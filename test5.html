@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>随机轮盘抽奖系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            display: flex;
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .control-panel {
+            flex: 1;
+            padding: 30px;
+            background: #2c3e50;
+            color: white;
+        }
+        
+        .wheel-container {
+            flex: 1.5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            position: relative;
+        }
+        
+        .result-panel {
+            flex: 1;
+            padding: 30px;
+            background: #34495e;
+            color: white;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+            color: #f1c40f;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        h2 {
+            margin-bottom: 20px;
+            color: #f1c40f;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+        
+        .prize-input {
+            width: 100%;
+            margin-bottom: 15px;
+            display: flex;
+        }
+        
+        .prize-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px 0 0 8px;
+            font-size: 1rem;
+        }
+        
+        .add-btn {
+            padding: 12px 20px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .add-btn:hover {
+            background: #2ecc71;
+        }
+        
+        .prizes-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+        }
+        
+        .prize-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            margin-bottom: 8px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        
+        .prize-item:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+        
+        .spin-btn {
+            padding: 15px 40px;
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .spin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .spin-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .wheel {
+            width: 350px;
+            height: 350px;
+            position: relative;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 8px solid #2c3e50;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        }
+        
+        .sector {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: bottom right;
+            left: 0;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .sector-content {
+            transform: rotate(45deg);
+            width: 100px;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            font-size: 14px;
+        }
+        
+        .pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 50px;
+            background: #e74c3c;
+            clip-path: polygon(50% 100%, 0 0, 100% 0);
+            z-index: 10;
+        }
+        
+        .result-content {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 30px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .result-text {
+            font-size: 2.5rem;
+            color: #f1c40f;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .history-title {
+            margin-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 20px;
+        }
+        
+        .history-list {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        
+        .history-item {
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-bottom: 5px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .instruction {
+            margin-top: 30px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .instruction h3 {
+            color: #f1c40f;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .instruction ul {
+            padding-left: 20px;
+        }
+        
+        .instruction li {
+            margin-bottom: 8px;
+        }
+        
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .wheel {
+                width: 280px;
+                height: 280px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="control-panel">
+            <h1>随机轮盘抽奖系统</h1>
+            
+            <h2>设置奖项</h2>
+            <div class="prize-input">
+                <input type="text" id="prizeInput" placeholder="输入奖项名称">
+                <button class="add-btn" id="addBtn">添加</button>
+            </div>
+            
+            <div class="prizes-list" id="prizesList">
+                <div class="prize-item">
+                    <span>一等奖：iPhone 15 Pro</span>
+                    <button class="delete-btn">×</button>
+                </div>
+                <div class="prize-item">
+                    <span>二等奖：iPad Pro</span>
+                    <button class="delete-btn">×</button>
+                </div>
+                <div class="prize-item">
+                    <span>三等奖：AirPods Pro</span>
+                    <button class="delete-btn">×</button>
+                </div>
+                <div class="prize-item">
+                    <span>四等奖：智能手表</span>
+                    <button class="delete-btn">×</button>
+                </div>
+                <div class="prize-item">
+                    <span>五等奖：充电宝</span>
+                    <button class="delete-btn">×</button>
+                </div>
+                <div class="prize-item">
+                    <span>六等奖：谢谢参与</span>
+                    <button class="delete-btn">×</button>
+                </div>
+            </div>
+            
+            <button class="spin-btn" id="spinBtn">开始抽奖</button>
+        </div>
+        
+        <div class="wheel-container">
+            <div class="wheel" id="wheel">
+                <div class="pointer"></div>
+                <!-- Sectors will be generated by JavaScript -->
+            </div>
+        </div>
+        
+        <div class="result-panel">
+            <h2>抽奖结果</h2>
+            <div class="result-content">
+                <div id="resultText" class="result-text">等待抽奖...</div>
+            </div>
+            
+            <div class="history-title">
+                <h2>历史记录</h2>
+                <div class="history-list" id="historyList">
+                    <!-- History items will be added here -->
+                </div>
+            </div>
+            
+            <div class="instruction">
+                <h3>使用说明</h3>
+                <ul>
+                    <li>在左侧输入奖项并点击"添加"按钮</li>
+                    <li>可以添加多个奖项（至少需要3个）</li>
+                    <li>点击"开始抽奖"按钮启动轮盘</li>
+                    <li>轮盘停止后显示抽奖结果</li>
+                    <li>历史记录会保存在右侧面板</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-spin-1020.mp3"></audio>
+    <audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const prizeInput = document.getElementById('prizeInput');
+            const addBtn = document.getElementById('addBtn');
+            const prizesList = document.getElementById('prizesList');
+            const spinBtn = document.getElementById('spinBtn');
+            const wheel = document.getElementById('wheel');
+            const resultText = document.getElementById('resultText');
+            const historyList = document.getElementById('historyList');
+            const spinSound = document.getElementById('spinSound');
+            const winSound = document.getElementById('winSound');
+            
+            // 初始奖项数据
+            let prizes = [
+                "一等奖：iPhone 15 Pro",
+                "二等奖：iPad Pro",
+                "三等奖：AirPods Pro",
+                "四等奖：智能手表",
+                "五等奖：充电宝",
+                "六等奖：谢谢参与"
+            ];
+            
+            // 历史记录
+            let history = [];
+            
+            // 初始化轮盘
+            renderWheel();
+            
+            // 添加奖项
+            addBtn.addEventListener('click', function() {
+                const prize = prizeInput.value.trim();
+                if (prize) {
+                    prizes.push(prize);
+                    renderPrizesList();
+                    renderWheel();
+                    prizeInput.value = '';
+                    prizeInput.focus();
+                }
+            });
+            
+            // 删除奖项
+            prizesList.addEventListener('click', function(e) {
+                if (e.target.classList.contains('delete-btn')) {
+                    const item = e.target.closest('.prize-item');
+                    const index = Array.from(prizesList.children).indexOf(item);
+                    prizes.splice(index, 1);
+                    renderPrizesList();
+                    renderWheel();
+                }
+            });
+            
+            // 开始抽奖
+            spinBtn.addEventListener('click', function() {
+                if (prizes.length < 3) {
+                    alert('请至少添加3个奖项！');
+                    return;
+                }
+                
+                // 禁用按钮
+                spinBtn.disabled = true;
+                spinBtn.textContent = '抽奖中...';
+                
+                // 播放音效
+                spinSound.currentTime = 0;
+                spinSound.play();
+                
+                // 随机选择奖项
+                const selectedIndex = Math.floor(Math.random() * prizes.length);
+                const selectedPrize = prizes[selectedIndex];
+                
+                // 计算旋转角度（至少旋转5圈以上）
+                const rotation = 1800 + (selectedIndex * (360 / prizes.length)) + Math.random() * (360 / prizes.length);
+                
+                // 应用旋转
+                wheel.style.transform = `rotate(${rotation}deg)`;
+                
+                // 显示结果
+                setTimeout(function() {
+                    winSound.play();
+                    resultText.textContent = selectedPrize;
+                    
+                    // 添加到历史记录
+                    history.unshift(selectedPrize);
+                    if (history.length > 10) history.pop();
+                    renderHistory();
+                    
+                    // 启用按钮
+                    spinBtn.disabled = false;
+                    spinBtn.textContent = '开始抽奖';
+                }, 4500);
+            });
+            
+            // 渲染奖项列表
+            function renderPrizesList() {
+                prizesList.innerHTML = '';
+                prizes.forEach(prize => {
+                    const item = document.createElement('div');
+                    item.className = 'prize-item';
+                    item.innerHTML = `
+                        <span>${prize}</span>
+                        <button class="delete-btn">×</button>
+                    `;
+                    prizesList.appendChild(item);
+                });
+            }
+            
+            // 渲染轮盘
+            function renderWheel() {
+                wheel.innerHTML = '<div class="pointer"></div>';
+                wheel.style.transform = 'rotate(0deg)';
+                
+                const sectorAngle = 360 / prizes.length;
+                const colors = [
+                    '#e74c3c', '#3498db', '#2ecc71', '#f1c40f', 
+                    '#9b59b6', '#1abc9c', '#d35400', '#34495e'
+                ];
+                
+                prizes.forEach((prize, index) => {
+                    const sector = document.createElement('div');
+                    sector.className = 'sector';
+                    sector.style.backgroundColor = colors[index % colors.length];
+                    sector.style.transform = `rotate(${index * sectorAngle}deg)`;
+                    
+                    const content = document.createElement('div');
+                    content.className = 'sector-content';
+                    content.textContent = prize;
+                    
+                    sector.appendChild(content);
+                    wheel.appendChild(sector);
+                });
+            }
+            
+            // 渲染历史记录
+            function renderHistory() {
+                historyList.innerHTML = '';
+                history.forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    historyItem.textContent = item;
+                    historyList.appendChild(historyItem);
+                });
+            }
+            
+            // 初始化渲染
+            renderPrizesList();
+            renderHistory();
+        });
+    </script>
+</body>
+</html>

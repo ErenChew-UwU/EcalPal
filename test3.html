@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Timetable System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 添加PDF导出所需的库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 10px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1450px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .action-bar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #1a3a6c 0%, #2c5282 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+        }
+        
+        .action-btn:active {
+            transform: translateY(0);
+        }
+        
+        .university-header {
+            background: linear-gradient(135deg, #1a3a6c 0%, #2c5282 100%);
+            color: white;
+            padding: 35px 25px 25px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .university-name {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        
+        .faculty-name {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #cbd5e0;
+        }
+        
+        .program-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .academic-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            font-size: 16px;
+        }
+        
+        .academic-info div {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 20px;
+            border-radius: 20px;
+        }
+        
+        .content-wrapper {
+            display: flex;
+            padding: 25px;
+            gap: 25px;
+        }
+        
+        .timetable-section {
+            flex: 3;
+        }
+        
+        .term-dates-section {
+            flex: 1;
+            min-width: 380px;
+        }
+        
+        .section-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-title span {
+            font-size: 16px;
+            font-weight: 400;
+            color: #4a5568;
+        }
+        
+        .timetable-container {
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+        
+        .timetable {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            min-width: 800px;
+        }
+        
+        .timetable th, .timetable td {
+            border: 1px solid #e2e8f0;
+            padding: 12px 10px;
+            text-align: center;
+            font-size: 14px;
+            height: 50px;
+        }
+        
+        .timetable th {
+            background-color: #edf2f7;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .time-cell {
+            background-color: #f7fafc;
+            font-weight: 500;
+            color: #4a5568;
+            width: 120px;
+        }
+        
+        .class-slot {
+            background-color: #ebf8ff;
+            color: #2b6cb0;
+            font-weight: 500;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+            vertical-align: top;
+            padding: 10px 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .class-slot:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .class-slot::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: #3182ce;
+        }
+        
+        .class-slot .course-code {
+            font-weight: 700;
+            font-size: 16px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .class-slot .class-type {
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 2px 6px;
+            border-radius: 3px;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+        
+        .class-slot .class-room {
+            font-size: 13px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .class-slot .date-range {
+            font-size: 11px;
+            color: #4a5568;
+        }
+        
+        .module-info {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-top: 25px;
+        }
+        
+        .module-info th {
+            background-color: #2c5282;
+            color: white;
+            padding: 14px;
+            text-align: left;
+            font-weight: 500;
+        }
+        
+        .module-info td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .module-info tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        .term-dates {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            table-layout: fixed;
+        }
+        
+        .term-dates th, .term-dates td {
+            border: 1px solid #e2e8f0;
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .term-dates th {
+            background-color: #edf2f7;
+            font-weight: 600;
+        }
+        
+        .term-dates tr:nth-child(odd) {
+            background-color: #f8fafc;
+        }
+        
+        .term-dates tr:hover {
+            background-color: #ebf8ff;
+        }
+        
+        .term-dates th:nth-child(1), .term-dates td:nth-child(1) {
+            width: 15%;
+        }
+        
+        .term-dates th:nth-child(2), .term-dates td:nth-child(2) {
+            width: 22%;
+        }
+        
+        .term-dates th:nth-child(3), .term-dates td:nth-child(3) {
+            width: 22%;
+        }
+        
+        .term-dates th:nth-child(4), .term-dates td:nth-child(4) {
+            width: 41%;
+            text-align: left;
+            padding-left: 12px;
+        }
+        
+        .colored {
+            color: #c53030;
+            font-weight: 500;
+        }
+        
+        .semester-break {
+            background-color: #f0fff4;
+            font-style: italic;
+            color: #2f855a;
+        }
+        
+        .footer {
+            background: #f8fafc;
+            padding: 20px;
+            text-align: center;
+            font-size: 15px;
+            color: #4a5568;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .students-list {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .dynamic-placeholder {
+            background-color: #e2e8f0;
+            color: #4a5568;
+            border-radius: 4px;
+            padding: 2px 6px;
+            display: inline-block;
+            min-width: 100px;
+        }
+        
+        .highlight {
+            background-color: #fff9db;
+            box-shadow: 0 0 0 2px #ffd43b;
+        }
+        
+        @media (max-width: 1100px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+            
+            .term-dates-section {
+                min-width: 100%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .university-header {
+                padding: 15px;
+            }
+            
+            .academic-info {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .content-wrapper {
+                padding: 15px;
+            }
+            
+            .action-bar {
+                position: static;
+                justify-content: center;
+                margin: 15px 0;
+            }
+            
+            .term-dates th:nth-child(4), .term-dates td:nth-child(4) {
+                min-width: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 添加ID用于PDF导出 -->
+    <div class="container" id="contentToExport">
+        <div class="action-bar">
+            <button class="action-btn" id="exportBtn">
+                <i class="fas fa-file-pdf"></i> Export as PDF
+            </button>
+        </div>
+        <div class="university-header">
+            <div class="university-name">FIRST CITY UNIVERSITY COLLEGE</div>
+            <div class="faculty-name">Faculty of Computer Science and Technology</div>
+            <div class="program-name">Diploma in Information Technology</div>
+            
+            <div class="academic-info">
+                <div>Academic Year <span class="dynamic-placeholder">2024</span></div>
+                <div>Year <span class="dynamic-placeholder">1</span>, Semester <span class="dynamic-placeholder">Oct</span> (<span class="dynamic-placeholder">Oct 2023</span> intakes)</div>
+            </div>
+        </div>
+        
+        <div class="content-wrapper">
+            <div class="timetable-section">
+                <div class="section-title">
+                    <div>Timetable</div>
+                    <span>Effective Date: <span class="dynamic-placeholder">7/10/2024</span></span>
+                </div>
+                
+                <div class="timetable-container">
+                    <table class="timetable">
+                        <thead>
+                            <tr>
+                                <th class="time-cell">Time</th>
+                                <th>MON</th>
+                                <th>TUE</th>
+                                <th>WED</th>
+                                <th>THU</th>
+                                <th>FRI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="time-cell">9:00 AM - 9:30 AM</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="time-cell">9:30 AM - 10:00 AM</td>
+                                <td rowspan="3" class="class-slot">
+                                    <span class="course-code dynamic-placeholder">COA</span>
+                                    <span class="class-type dynamic-placeholder">Lecture</span><br>
+                                    <span class="class-room dynamic-placeholder">A501</span><br>
+                                    <span class="date-range dynamic-placeholder">26.05.2025 - 29.08.2025</span>
+                                </td>
+                                <td rowspan="3" class="class-slot">
+                                    <span class="course-code dynamic-placeholder">MPU</span>
+                                    <span class="class-type dynamic-placeholder">Community Service</span><br>
+                                    <span class="class-room dynamic-placeholder">LT2</span><br>
+                                    <span class="date-range dynamic-placeholder">26.05.2025 - 29.08.2025</span>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="time-cell">10:00 AM - 10:30 AM</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="time-cell">10:30 AM - 11:00 AM</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="time-cell">11:00 AM - 11:30 AM</td>
+                                <td rowspan="3" class="class-slot">
+                                    <span class="course-code dynamic-placeholder">IT</span>
+                                    <span class="class-type dynamic-placeholder">Lecture</span><br>
+                                    <span class="class-room dynamic-placeholder">B609</span><br>
+                                    <span class="date-range dynamic-placeholder">26.05.2025 - 29.08.2025</span>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="time-cell">11:30 AM - 12:00 PM</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="time-cell">12:00 PM - 12:30 PM</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="time-cell">12:30 PM - 1:00 PM</td>
+                                <td colspan="5" style="background: #f7fafc; color: #a0aec0; font-weight: 500;">LUNCH BREAK</td>
+                            </tr>
+                            <tr>
+                                <td class="time-cell">2:00 PM - 2:30 PM</td>
+                                <td></td>
+                                <td rowspan="3" class="class-slot">
+                                    <span class="course-code dynamic-placeholder">IT</span>
+                                    <span class="class-type dynamic-placeholder">Practical</span><br>
+                                    <span class="class-room dynamic-placeholder">IT Lab 9</span><br>
+                                    <span class="date-range dynamic-placeholder">26.05.2025 - 29.08.2025</span>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="time-cell">2:30 PM - 3:00 PM</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="time-cell">3:00 PM - 3:30 PM</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <table class="module-info">
+                    <tr>
+                        <th>Module</th>
+                        <th>Code</th>
+                        <th>Lecturer</th>
+                        <th>Lecturing Hours</th>
+                        <th>Lab/Tutorial</th>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">DSA</span></td>
+                        <td><span class="dynamic-placeholder">CDIT453</span></td>
+                        <td><span class="dynamic-placeholder">Mohd Norfiti Bin Nordin</span></td>
+                        <td><span class="dynamic-placeholder">2</span></td>
+                        <td><span class="dynamic-placeholder">2</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">IT</span></td>
+                        <td><span class="dynamic-placeholder">CDIT434</span></td>
+                        <td><span class="dynamic-placeholder">Nurul Syafiqa Mat Nor</span></td>
+                        <td><span class="dynamic-placeholder">2</span></td>
+                        <td><span class="dynamic-placeholder">2</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">COA</span></td>
+                        <td><span class="dynamic-placeholder">CDIT545</span></td>
+                        <td><span class="dynamic-placeholder">Mohd Norfiti Bin Nordin</span></td>
+                        <td><span class="dynamic-placeholder">2</span></td>
+                        <td><span class="dynamic-placeholder">2</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">MPU</span></td>
+                        <td><span class="dynamic-placeholder">MPU2412</span></td>
+                        <td><span class="dynamic-placeholder">Ms. Siti Hajar</span></td>
+                        <td><span class="dynamic-placeholder">1</span></td>
+                        <td><span class="dynamic-placeholder">1</span></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="term-dates-section">
+                <div class="section-title">
+                    <div>Term Dates <span class="dynamic-placeholder">(May 2025 - Aug 2025)</span></div>
+                </div>
+                
+                <table class="term-dates">
+                    <tr>
+                        <th>Week</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Status</th>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">1</span></td>
+                        <td><span class="dynamic-placeholder">26-May-25</span></td>
+                        <td><span class="dynamic-placeholder">30-May-25</span></td>
+                        <td>Active week 1, teaching schedule</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">2</span></td>
+                        <td><span class="dynamic-placeholder">2-Jun-25</span></td>
+                        <td><span class="dynamic-placeholder">6-Jun-25</span></td>
+                        <td>Active week 2</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">3</span></td>
+                        <td><span class="dynamic-placeholder">9-Jun-25</span></td>
+                        <td><span class="dynamic-placeholder">13-Jun-25</span></td>
+                        <td>Active week 3</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">4</span></td>
+                        <td><span class="dynamic-placeholder">16-Jun-25</span></td>
+                        <td><span class="dynamic-placeholder">20-Jun-25</span></td>
+                        <td>Active week 4</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">5</span></td>
+                        <td><span class="dynamic-placeholder">23-Jun-25</span></td>
+                        <td><span class="dynamic-placeholder">27-Jun-25</span></td>
+                        <td>Active week 5</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">6</span></td>
+                        <td><span class="dynamic-placeholder">30-Jun-25</span></td>
+                        <td><span class="dynamic-placeholder">4-Jul-25</span></td>
+                        <td>Active week 6</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">7</span></td>
+                        <td><span class="dynamic-placeholder">7-Jul-25</span></td>
+                        <td><span class="dynamic-placeholder">11-Jul-25</span></td>
+                        <td>Active week 7</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">8</span></td>
+                        <td><span class="dynamic-placeholder">14-Jul-25</span></td>
+                        <td><span class="dynamic-placeholder">18-Jul-25</span></td>
+                        <td>Active week 8</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">9</span></td>
+                        <td><span class="dynamic-placeholder">21-Jul-25</span></td>
+                        <td><span class="dynamic-placeholder">25-Jul-25</span></td>
+                        <td>Active week 9</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">10</span></td>
+                        <td><span class="dynamic-placeholder">28-Jul-25</span></td>
+                        <td><span class="dynamic-placeholder">1-Aug-25</span></td>
+                        <td>Active week 10</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">11</span></td>
+                        <td><span class="dynamic-placeholder">4-Aug-25</span></td>
+                        <td><span class="dynamic-placeholder">8-Aug-25</span></td>
+                        <td>Active week 11</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">12</span></td>
+                        <td><span class="dynamic-placeholder">11-Aug-25</span></td>
+                        <td><span class="dynamic-placeholder">15-Aug-25</span></td>
+                        <td>Active week 12</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">13</span></td>
+                        <td><span class="dynamic-placeholder">18-Aug-25</span></td>
+                        <td><span class="dynamic-placeholder">22-Aug-25</span></td>
+                        <td>Active week 13</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">14</span></td>
+                        <td><span class="dynamic-placeholder">25-Aug-25</span></td>
+                        <td><span class="dynamic-placeholder">29-Aug-25</span></td>
+                        <td>Active week 14</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">15</span></td>
+                        <td><span class="dynamic-placeholder">1-Sep-25</span></td>
+                        <td><span class="dynamic-placeholder">5-Sep-25</span></td>
+                        <td class="colored">Final examination/Marking week</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">16</span></td>
+                        <td><span class="dynamic-placeholder">8-Sep-25</span></td>
+                        <td><span class="dynamic-placeholder">12-Sep-25</span></td>
+                        <td class="colored">Final examination/Marking week</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">17</span></td>
+                        <td><span class="dynamic-placeholder">15-Sep-25</span></td>
+                        <td><span class="dynamic-placeholder">19-Sep-25</span></td>
+                        <td class="semester-break">Semester Break</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dynamic-placeholder">18</span></td>
+                        <td><span class="dynamic-placeholder">22-Sep-25</span></td>
+                        <td><span class="dynamic-placeholder">26-Sep-25</span></td>
+                        <td class="semester-break">Semester Break</td>
+                    </tr>
+                </table>
+                <div style="font-size: 14px; color: #718096; margin-top: 15px; font-style: italic;">
+                    * The term dates are subject to change without prior notice
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="students-list">
+                Timetable for: <span class="dynamic-placeholder">Chew Zhen Kang, Chen Jia Jun, Natanel, Loo Shuo Wen, Wong Shang Kang, Matthew</span>
+            </div>
+            <div>
+                © 2025 First City University College - Faculty of Computer Science and Technology
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 示例数据
+        const dynamicData = {
+            university: "FIRST CITY UNIVERSITY COLLEGE",
+            faculty: "Faculty of Computer Science and Technology",
+            program: "Diploma in Information Technology",
+            academicYear: "2024",
+            year: "1",
+            semester: "Oct",
+            intake: "Oct 2023",
+            effectiveDate: "7/10/2024",
+            students: "Chew Zhen Kang, Chen Jia Jun, Natanel, Loo Shuo Wen, Wong Shang Kang, Matthew",
+            termDatesRange: "May 2025 - Aug 2025",
+            
+            courses: [
+                { code: "COA", type: "Lecture", room: "A501", dateRange: "26.05.2025 - 29.08.2025" },
+                { code: "MPU", type: "Community Service", room: "LT2", dateRange: "26.05.2025 - 29.08.2025" },
+                { code: "IT", type: "Lecture", room: "B609", dateRange: "26.05.2025 - 29.08.2025" },
+                { code: "IT", type: "Practical", room: "IT Lab 9", dateRange: "26.05.2025 - 29.08.2025" }
+            ],
+            
+            modules: [
+                { name: "DSA", code: "CDIT453", lecturer: "Mohd Norfiti Bin Nordin", lecturing: "2", lab: "2" },
+                { name: "IT", code: "CDIT434", lecturer: "Nurul Syafiqa Mat Nor", lecturing: "2", lab: "2" },
+                { name: "COA", code: "CDIT545", lecturer: "Mohd Norfiti Bin Nordin", lecturing: "2", lab: "2" },
+                { name: "MPU", code: "MPU2412", lecturer: "Ms. Siti Hajar", lecturing: "1", lab: "1" }
+            ],
+            
+            termDates: [
+                { week: "1", from: "26-May-25", to: "30-May-25" },
+                { week: "2", from: "2-Jun-25", to: "6-Jun-25" },
+                { week: "3", from: "9-Jun-25", to: "13-Jun-25" },
+                { week: "4", from: "16-Jun-25", to: "20-Jun-25" },
+                { week: "5", from: "23-Jun-25", to: "27-Jun-25" },
+                { week: "6", from: "30-Jun-25", to: "4-Jul-25" },
+                { week: "7", from: "7-Jul-25", to: "11-Jul-25" },
+                { week: "8", from: "14-Jul-25", to: "18-Jul-25" },
+                { week: "9", from: "21-Jul-25", to: "25-Jul-25" },
+                { week: "10", from: "28-Jul-25", to: "1-Aug-25" },
+                { week: "11", from: "4-Aug-25", to: "8-Aug-25" },
+                { week: "12", from: "11-Aug-25", to: "15-Aug-25" },
+                { week: "13", from: "18-Aug-25", to: "22-Aug-25" },
+                { week: "14", from: "25-Aug-25", to: "29-Aug-25" },
+                { week: "15", from: "1-Sep-25", to: "5-Sep-25" },
+                { week: "16", from: "8-Sep-25", to: "12-Sep-25" },
+                { week: "17", from: "15-Sep-25", to: "19-Sep-25" },
+                { week: "18", from: "22-Sep-25", to: "26-Sep-25" }
+            ]
+        };
+
+        // 填充动态数据
+        function populateDynamicData() {
+            document.querySelector('.university-name').textContent = dynamicData.university;
+            document.querySelector('.faculty-name').textContent = dynamicData.faculty;
+            document.querySelector('.program-name').textContent = dynamicData.program;
+            
+            document.querySelectorAll('.dynamic-placeholder').forEach(el => {
+                const key = el.textContent.toLowerCase();
+                if (dynamicData[key]) {
+                    el.textContent = dynamicData[key];
+                }
+            });
+            
+            const courseSlots = document.querySelectorAll('.class-slot');
+            dynamicData.courses.forEach((course, index) => {
+                if (courseSlots[index]) {
+                    courseSlots[index].querySelector('.course-code').textContent = course.code;
+                    courseSlots[index].querySelector('.class-type').textContent = course.type;
+                    courseSlots[index].querySelector('.class-room').textContent = course.room;
+                    courseSlots[index].querySelector('.date-range').textContent = course.dateRange;
+                }
+            });
+            
+            const moduleRows = document.querySelectorAll('.module-info tr:not(:first-child)');
+            dynamicData.modules.forEach((module, index) => {
+                if (moduleRows[index]) {
+                    const cells = moduleRows[index].querySelectorAll('td');
+                    cells[0].textContent = module.name;
+                    cells[1].textContent = module.code;
+                    cells[2].textContent = module.lecturer;
+                    cells[3].textContent = module.lecturing;
+                    cells[4].textContent = module.lab;
+                }
+            });
+            
+            const dateRows = document.querySelectorAll('.term-dates tr:not(:first-child)');
+            dynamicData.termDates.forEach((date, index) => {
+                if (dateRows[index]) {
+                    const cells = dateRows[index].querySelectorAll('td');
+                    cells[0].textContent = date.week;
+                    cells[1].textContent = date.from;
+                    cells[2].textContent = date.to;
+                }
+            });
+        }
+
+        // 导出PDF功能
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            const element = document.getElementById('contentToExport');
+            
+            // 显示加载效果
+            const btn = this;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+            btn.disabled = true;
+            
+            // 使用html2canvas将HTML元素转换为canvas
+            html2canvas(element, {
+                scale: 2, // 提高清晰度
+                useCORS: true, // 允许跨域图片
+                logging: false // 关闭日志
+            }).then(canvas => {
+                // 将canvas转换为图片数据
+                const imgData = canvas.toDataURL('image/png');
+                
+                // 初始化jsPDF，使用A4纸纵向
+                const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210; // A4纸的宽度（毫米）
+                const imgHeight = canvas.height * imgWidth / canvas.width; // 按比例计算高度
+                
+                // 将图片添加到PDF中
+                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                
+                // 保存PDF文件
+                pdf.save('university-timetable.pdf');
+                
+                // 恢复按钮状态
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }).catch(error => {
+                console.error('Error generating PDF:', error);
+                // 恢复按钮状态
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                alert('Error generating PDF. Please try again.');
+            });
+        });
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            populateDynamicData();
+            highlightCurrentWeek();
+        });
+    </script>
+</body>
+</html>

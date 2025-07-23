@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据结构算法动画演示 - Lab 1</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .algorithm-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .algorithm-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .algorithm-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+        }
+        
+        .card-header {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #ff6b6b;
+        }
+        
+        .card-title {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+        
+        .card-subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .visualization {
+            padding: 25px;
+            min-height: 250px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .array-bar {
+            width: 30px;
+            background: linear-gradient(to top, #4facfe, #00f2fe);
+            margin: 0 2px;
+            border-radius: 5px 5px 0 0;
+            position: relative;
+            transition: height 0.3s ease, background 0.3s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        .array-bar.min {
+            background: linear-gradient(to top, #ff9a9e, #fad0c4);
+        }
+        
+        .array-bar.compared {
+            background: linear-gradient(to top, #ffd166, #ffd166);
+        }
+        
+        .array-bar.sorted {
+            background: linear-gradient(to top, #06d6a0, #06d6a0);
+        }
+        
+        .array-bar.pivot {
+            background: linear-gradient(to top, #ef476f, #ef476f);
+        }
+        
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .controls {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            background: linear-gradient(to right, #ff6b6b, #ff8e53);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(to right, #ff8e53, #ff6b6b);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .description {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .description h3 {
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            color: #ffd166;
+        }
+        
+        .complexity {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .complexity-item {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .complexity-item h4 {
+            color: #06d6a0;
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 15px;
+            font-weight: bold;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .explanation {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        @media (max-width: 768px) {
+            .algorithm-container {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>数据结构算法动画演示</h1>
+            <p class="subtitle">本交互式演示帮助您可视化理解Lab 1中的各种数组算法。通过动画展示选择排序、二分查找、插入排序和归并排序的执行过程，揭示算法的工作原理。</p>
+        </header>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(to top, #4facfe, #00f2fe);"></div>
+                <span>普通元素</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(to top, #ffd166, #ffd166);"></div>
+                <span>比较元素</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(to top, #ff9a9e, #fad0c4);"></div>
+                <span>最小元素</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(to top, #06d6a0, #06d6a0);"></div>
+                <span>已排序元素</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(to top, #ef476f, #ef476f);"></div>
+                <span>枢轴/基准元素</span>
+            </div>
+        </div>
+        
+        <div class="algorithm-container">
+            <!-- 选择排序 -->
+            <div class="algorithm-card">
+                <div class="card-header">
+                    <h2 class="card-title">选择排序</h2>
+                    <p class="card-subtitle">重复寻找最小元素并交换到前面</p>
+                </div>
+                <div class="visualization" id="selection-sort-viz">
+                    <!-- 条形图将由JS生成 -->
+                </div>
+                <div class="status" id="selection-sort-status">准备开始排序...</div>
+                <div class="controls">
+                    <button id="selection-reset">重置数组</button>
+                    <button id="selection-start">开始排序</button>
+                    <button id="selection-step">单步执行</button>
+                </div>
+                <div class="description">
+                    <h3>选择排序算法</h3>
+                    <p>选择排序将数组分为已排序和未排序两部分。算法重复从未排序部分找到最小元素并将其放到已排序部分的末尾。</p>
+                    <div class="explanation">
+                        <p><strong>当前步骤解释：</strong> <span id="selection-explain">初始化数组，准备开始排序。</span></p>
+                    </div>
+                    <div class="complexity">
+                        <div class="complexity-item">
+                            <h4>时间复杂度</h4>
+                            <p>最优: O(n²)</p>
+                            <p>平均: O(n²)</p>
+                            <p>最差: O(n²)</p>
+                        </div>
+                        <div class="complexity-item">
+                            <h4>空间复杂度</h4>
+                            <p>O(1) - 原地排序</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 二分查找 -->
+            <div class="algorithm-card">
+                <div class="card-header">
+                    <h2 class="card-title">二分查找</h2>
+                    <p class="card-subtitle">在已排序数组中高效查找元素</p>
+                </div>
+                <div class="visualization" id="binary-search-viz">
+                    <!-- 条形图将由JS生成 -->
+                </div>
+                <div class="status" id="binary-search-status">准备开始查找...</div>
+                <div class="controls">
+                    <button id="binary-reset">重置数组</button>
+                    <button id="binary-start">开始查找</button>
+                    <button id="binary-step">单步执行</button>
+                    <input type="number" id="search-value" min="1" max="99" value="42" style="padding: 10px; border-radius: 20px; border: none; width: 80px; text-align: center;">
+                </div>
+                <div class="description">
+                    <h3>二分查找算法</h3>
+                    <p>二分查找在已排序数组中将目标值与中间元素比较，根据比较结果缩小搜索范围，直到找到目标或范围为空。</p>
+                    <div class="explanation">
+                        <p><strong>当前步骤解释：</strong> <span id="binary-explain">初始化数组，准备开始查找。</span></p>
+                    </div>
+                    <div class="complexity">
+                        <div class="complexity-item">
+                            <h4>时间复杂度</h4>
+                            <p>最优: O(1)</p>
+                            <p>平均: O(log n)</p>
+                            <p>最差: O(log n)</p>
+                        </div>
+                        <div class="complexity-item">
+                            <h4>空间复杂度</h4>
+                            <p>O(1) - 迭代实现</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 插入排序 -->
+            <div class="algorithm-card">
+                <div class="card-header">
+                    <h2 class="card-title">插入排序</h2>
+                    <p class="card-subtitle">逐个构建最终排序数组</p>
+                </div>
+                <div class="visualization" id="insertion-sort-viz">
+                    <!-- 条形图将由JS生成 -->
+                </div>
+                <div class="status" id="insertion-sort-status">准备开始排序...</div>
+                <div class="controls">
+                    <button id="insertion-reset">重置数组</button>
+                    <button id="insertion-start">开始排序</button>
+                    <button id="insertion-step">单步执行</button>
+                </div>
+                <div class="description">
+                    <h3>插入排序算法</h3>
+                    <p>插入排序的工作原理是通过构建有序序列，对于未排序数据，在已排序序列中从后向前扫描，找到相应位置并插入。</p>
+                    <div class="explanation">
+                        <p><strong>当前步骤解释：</strong> <span id="insertion-explain">初始化数组，准备开始排序。</span></p>
+                    </div>
+                    <div class="complexity">
+                        <div class="complexity-item">
+                            <h4>时间复杂度</h4>
+                            <p>最优: O(n) - 已排序数组</p>
+                            <p>平均: O(n²)</p>
+                            <p>最差: O(n²)</p>
+                        </div>
+                        <div class="complexity-item">
+                            <h4>空间复杂度</h4>
+                            <p>O(1) - 原地排序</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 归并排序 -->
+            <div class="algorithm-card">
+                <div class="card-header">
+                    <h2 class="card-title">归并排序</h2>
+                    <p class="card-subtitle">分而治之的高效排序算法</p>
+                </div>
+                <div class="visualization" id="merge-sort-viz">
+                    <!-- 条形图将由JS生成 -->
+                </div>
+                <div class="status" id="merge-sort-status">准备开始排序...</div>
+                <div class="controls">
+                    <button id="merge-reset">重置数组</button>
+                    <button id="merge-start">开始排序</button>
+                    <button id="merge-step">单步执行</button>
+                </div>
+                <div class="description">
+                    <h3>归并排序算法</h3>
+                    <p>归并排序采用分治法：将数组分成两半，分别排序，然后合并两个有序数组。该算法高效稳定但需要额外空间。</p>
+                    <div class="explanation">
+                        <p><strong>当前步骤解释：</strong> <span id="merge-explain">初始化数组，准备开始排序。</span></p>
+                    </div>
+                    <div class="complexity">
+                        <div class="complexity-item">
+                            <h4>时间复杂度</h4>
+                            <p>最优: O(n log n)</p>
+                            <p>平均: O(n log n)</p>
+                            <p>最差: O(n log n)</p>
+                        </div>
+                        <div class="complexity-item">
+                            <h4>空间复杂度</h4>
+                            <p>O(n) - 需要额外空间</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 算法状态和配置
+        const algorithms = {
+            selection: {
+                array: [],
+                state: 'idle',
+                currentStep: 0,
+                minIndex: 0,
+                currentIndex: 0,
+                sortedIndex: -1,
+                interval: null
+            },
+            binary: {
+                array: [],
+                state: 'idle',
+                low: 0,
+                high: 0,
+                mid: 0,
+                target: 42,
+                found: false,
+                interval: null
+            },
+            insertion: {
+                array: [],
+                state: 'idle',
+                currentIndex: 1,
+                currentElement: 0,
+                sortedIndex: 0,
+                interval: null
+            },
+            merge: {
+                array: [],
+                state: 'idle',
+                steps: [],
+                currentStep: 0,
+                interval: null
+            }
+        };
+
+        // 初始化数组
+        function initArray(size, min, max) {
+            const array = [];
+            for (let i = 0; i < size; i++) {
+                array.push(Math.floor(Math.random() * (max - min + 1)) + min);
+            }
+            return array;
+        }
+
+        // 创建条形图可视化
+        function createVisualization(array, containerId, highlight = {}, algorithm = '') {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            const maxValue = Math.max(...array, 10);
+            
+            array.forEach((value, index) => {
+                const barHeight = (value / maxValue) * 200;
+                const bar = document.createElement('div');
+                bar.className = 'array-bar';
+                bar.style.height = `${barHeight}px`;
+                
+                // 根据算法状态添加高亮
+                if (algorithm === 'selection') {
+                    if (index === algorithms.selection.minIndex) {
+                        bar.classList.add('min');
+                    }
+                    if (index === algorithms.selection.currentIndex) {
+                        bar.classList.add('compared');
+                    }
+                    if (index <= algorithms.selection.sortedIndex) {
+                        bar.classList.add('sorted');
+                    }
+                } else if (algorithm === 'binary') {
+                    if (index === algorithms.binary.low || index === algorithms.binary.high) {
+                        bar.classList.add('compared');
+                    }
+                    if (index === algorithms.binary.mid) {
+                        bar.classList.add('pivot');
+                    }
+                } else if (algorithm === 'insertion') {
+                    if (index === algorithms.insertion.currentIndex) {
+                        bar.classList.add('pivot');
+                    }
+                    if (index < algorithms.insertion.currentIndex && index >= algorithms.insertion.sortedIndex) {
+                        bar.classList.add('compared');
+                    }
+                    if (index < algorithms.insertion.sortedIndex) {
+                        bar.classList.add('sorted');
+                    }
+                } else if (algorithm === 'merge') {
+                    // 归并排序高亮处理
+                }
+                
+                const valueLabel = document.createElement('div');
+                valueLabel.className = 'bar-value';
+                valueLabel.textContent = value;
+                
+                bar.appendChild(valueLabel);
+                container.appendChild(bar);
+            });
+        }
+
+        // 初始化所有算法
+        function initAlgorithms() {
+            // 选择排序
+            algorithms.selection.array = initArray(10, 10, 99);
+            algorithms.selection.state = 'idle';
+            algorithms.selection.currentStep = 0;
+            algorithms.selection.minIndex = 0;
+            algorithms.selection.currentIndex = 0;
+            algorithms.selection.sortedIndex = -1;
+            createVisualization(algorithms.selection.array, 'selection-sort-viz', {}, 'selection');
+            document.getElementById('selection-sort-status').textContent = '准备开始排序...';
+            document.getElementById('selection-explain').textContent = '初始化数组，准备开始排序。';
+            
+            // 二分查找
+            algorithms.binary.array = initArray(15, 10, 99).sort((a, b) => a - b);
+            algorithms.binary.state = 'idle';
+            algorithms.binary.low = 0;
+            algorithms.binary.high = algorithms.binary.array.length - 1;
+            algorithms.binary.mid = Math.floor((algorithms.binary.low + algorithms.binary.high) / 2);
+            algorithms.binary.target = 42;
+            algorithms.binary.found = false;
+            createVisualization(algorithms.binary.array, 'binary-search-viz', {}, 'binary');
+            document.getElementById('binary-search-status').textContent = '准备开始查找...';
+            document.getElementById('binary-explain').textContent = '初始化数组，准备开始查找。';
+            
+            // 插入排序
+            algorithms.insertion.array = initArray(10, 10, 99);
+            algorithms.insertion.state = 'idle';
+            algorithms.insertion.currentIndex = 1;
+            algorithms.insertion.currentElement = algorithms.insertion.array[1];
+            algorithms.insertion.sortedIndex = 0;
+            createVisualization(algorithms.insertion.array, 'insertion-sort-viz', {}, 'insertion');
+            document.getElementById('insertion-sort-status').textContent = '准备开始排序...';
+            document.getElementById('insertion-explain').textContent = '初始化数组，准备开始排序。';
+            
+            // 归并排序
+            algorithms.merge.array = initArray(10, 10, 99);
+            algorithms.merge.state = 'idle';
+            algorithms.merge.steps = [];
+            algorithms.merge.currentStep = 0;
+            createVisualization(algorithms.merge.array, 'merge-sort-viz');
+            document.getElementById('merge-sort-status').textContent = '准备开始排序...';
+            document.getElementById('merge-explain').textContent = '初始化数组，准备开始排序。';
+        }
+
+        // 选择排序算法实现
+        function selectionSortStep() {
+            const state = algorithms.selection;
+            
+            if (state.sortedIndex >= state.array.length - 1) {
+                document.getElementById('selection-sort-status').textContent = '排序完成！';
+                document.getElementById('selection-explain').textContent = '数组已完全排序。';
+                clearInterval(state.interval);
+                state.state = 'completed';
+                return;
+            }
+            
+            // 第一步：找到最小元素
+            if (state.currentIndex < state.array.length) {
+                if (state.array[state.currentIndex] < state.array[state.minIndex]) {
+                    state.minIndex = state.currentIndex;
+                }
+                state.currentIndex++;
+                
+                document.getElementById('selection-sort-status').textContent = 
+                    `正在查找最小元素: 当前最小值 ${state.array[state.minIndex]} 位于索引 ${state.minIndex}`;
+                document.getElementById('selection-explain').textContent = 
+                    `比较索引 ${state.currentIndex-1} 的元素 ${state.array[state.currentIndex-1]} 与当前最小值 ${state.array[state.minIndex]}`;
+            } 
+            // 第二步：交换元素
+            else {
+                if (state.minIndex !== state.sortedIndex + 1) {
+                    [state.array[state.sortedIndex + 1], state.array[state.minIndex]] = 
+                    [state.array[state.minIndex], state.array[state.sortedIndex + 1]];
+                    
+                    document.getElementById('selection-sort-status').textContent = 
+                        `交换元素: 将最小值 ${state.array[state.sortedIndex + 1]} 移动到索引 ${state.sortedIndex + 1}`;
+                    document.getElementById('selection-explain').textContent = 
+                        `将最小值 ${state.array[state.sortedIndex + 1]} 从索引 ${state.minIndex} 移动到索引 ${state.sortedIndex + 1}`;
+                } else {
+                    document.getElementById('selection-sort-status').textContent = 
+                        `最小值已在正确位置: ${state.array[state.sortedIndex + 1]} 在索引 ${state.sortedIndex + 1}`;
+                    document.getElementById('selection-explain').textContent = 
+                        `最小值 ${state.array[state.sortedIndex + 1]} 已经在索引 ${state.sortedIndex + 1}，不需要交换。`;
+                }
+                
+                state.sortedIndex++;
+                state.minIndex = state.sortedIndex + 1;
+                state.currentIndex = state.sortedIndex + 2;
+                
+                if (state.sortedIndex >= state.array.length - 1) {
+                    document.getElementById('selection-sort-status').textContent = '排序完成！';
+                    document.getElementById('selection-explain').textContent = '数组已完全排序。';
+                    clearInterval(state.interval);
+                    state.state = 'completed';
+                }
+            }
+            
+            createVisualization(state.array, 'selection-sort-viz', {}, 'selection');
+        }
+
+        // 二分查找算法实现
+        function binarySearchStep() {
+            const state = algorithms.binary;
+            
+            if (state.low > state.high) {
+                document.getElementById('binary-search-status').textContent = 
+                    `未找到元素 ${state.target}`;
+                document.getElementById('binary-explain').textContent = 
+                    `搜索范围为空，元素 ${state.target} 不在数组中。`;
+                clearInterval(state.interval);
+                state.state = 'completed';
+                return;
+            }
+            
+            state.mid = Math.floor((state.low + state.high) / 2);
+            const midValue = state.array[state.mid];
+            
+            document.getElementById('binary-search-status').textContent = 
+                `查找中: low=${state.low}, high=${state.high}, mid=${state.mid} (值: ${midValue})`;
+            
+            if (midValue === state.target) {
+                document.getElementById('binary-search-status').textContent = 
+                    `找到元素 ${state.target} 在索引 ${state.mid}`;
+                document.getElementById('binary-explain').textContent = 
+                    `在索引 ${state.mid} 找到目标值 ${state.target}。`;
+                clearInterval(state.interval);
+                state.state = 'completed';
+                state.found = true;
+            } else if (midValue < state.target) {
+                document.getElementById('binary-explain').textContent = 
+                    `中间值 ${midValue} 小于目标值 ${state.target}，搜索右半部分。`;
+                state.low = state.mid + 1;
+            } else {
+                document.getElementById('binary-explain').textContent = 
+                    `中间值 ${midValue} 大于目标值 ${state.target}，搜索左半部分。`;
+                state.high = state.mid - 1;
+            }
+            
+            createVisualization(state.array, 'binary-search-viz', {}, 'binary');
+        }
+
+        // 插入排序算法实现
+        function insertionSortStep() {
+            const state = algorithms.insertion;
+            
+            if (state.currentIndex >= state.array.length) {
+                document.getElementById('insertion-sort-status').textContent = '排序完成！';
+                document.getElementById('insertion-explain').textContent = '数组已完全排序。';
+                clearInterval(state.interval);
+                state.state = 'completed';
+                return;
+            }
+            
+            // 当前元素
+            const currentValue = state.array[state.currentIndex];
+            
+            // 如果已到达数组开头或找到插入位置
+            if (state.sortedIndex < 0 || state.array[state.sortedIndex] <= currentValue) {
+                state.array[state.sortedIndex + 1] = currentValue;
+                document.getElementById('insertion-sort-status').textContent = 
+                    `插入元素 ${currentValue} 到位置 ${state.sortedIndex + 1}`;
+                document.getElementById('insertion-explain').textContent = 
+                    `元素 ${currentValue} 插入到索引 ${state.sortedIndex + 1} 的位置。`;
+                
+                state.currentIndex++;
+                state.sortedIndex = state.currentIndex - 1;
+            } 
+            // 否则继续向左移动
+            else {
+                state.array[state.sortedIndex + 1] = state.array[state.sortedIndex];
+                document.getElementById('insertion-sort-status').textContent = 
+                    `移动元素 ${state.array[state.sortedIndex]} 从位置 ${state.sortedIndex} 到 ${state.sortedIndex + 1}`;
+                document.getElementById('insertion-explain').textContent = 
+                    `将元素 ${state.array[state.sortedIndex]} 向右移动一位，为插入元素 ${currentValue} 腾出空间。`;
+                state.sortedIndex--;
+            }
+            
+            createVisualization(state.array, 'insertion-sort-viz', {}, 'insertion');
+        }
+
+        // 归并排序算法实现 - 简化版
+        function mergeSortStep() {
+            const state = algorithms.merge;
+            
+            // 简化演示
+            if (state.steps.length === 0) {
+                // 生成一些演示步骤
+                state.steps = [
+                    {action: "split", message: "将数组分成两半"},
+                    {action: "split", message: "递归排序左半部分"},
+                    {action: "split", message: "递归排序右半部分"},
+                    {action: "merge", message: "合并两个已排序的部分"}
+                ];
+            }
+            
+            if (state.currentStep >= state.steps.length) {
+                document.getElementById('merge-sort-status').textContent = '排序完成！';
+                document.getElementById('merge-explain').textContent = '数组已完全排序。';
+                clearInterval(state.interval);
+                state.state = 'completed';
+                return;
+            }
+            
+            const step = state.steps[state.currentStep];
+            document.getElementById('merge-sort-status').textContent = step.message;
+            document.getElementById('merge-explain').textContent = step.message;
+            
+            // 模拟排序过程
+            if (step.action === "merge") {
+                state.array.sort((a, b) => a - b);
+            }
+            
+            createVisualization(state.array, 'merge-sort-viz');
+            state.currentStep++;
+        }
+
+        // 事件监听器设置
+        function setupEventListeners() {
+            // 选择排序事件
+            document.getElementById('selection-reset').addEventListener('click', () => {
+                clearInterval(algorithms.selection.interval);
+                initAlgorithms();
+            });
+            
+            document.getElementById('selection-start').addEventListener('click', () => {
+                if (algorithms.selection.state === 'idle') {
+                    algorithms.selection.state = 'running';
+                    algorithms.selection.interval = setInterval(selectionSortStep, 1500);
+                }
+            });
+            
+            document.getElementById('selection-step').addEventListener('click', () => {
+                if (algorithms.selection.state === 'idle') {
+                    algorithms.selection.state = 'running';
+                }
+                selectionSortStep();
+            });
+            
+            // 二分查找事件
+            document.getElementById('binary-reset').addEventListener('click', () => {
+                clearInterval(algorithms.binary.interval);
+                initAlgorithms();
+            });
+            
+            document.getElementById('binary-start').addEventListener('click', () => {
+                if (algorithms.binary.state === 'idle') {
+                    const target = parseInt(document.getElementById('search-value').value);
+                    if (!isNaN(target)) {
+                        algorithms.binary.target = target;
+                        algorithms.binary.state = 'running';
+                        algorithms.binary.low = 0;
+                        algorithms.binary.high = algorithms.binary.array.length - 1;
+                        algorithms.binary.found = false;
+                        algorithms.binary.interval = setInterval(binarySearchStep, 1500);
+                    }
+                }
+            });
+            
+            document.getElementById('binary-step').addEventListener('click', () => {
+                if (algorithms.binary.state === 'idle') {
+                    const target = parseInt(document.getElementById('search-value').value);
+                    if (!isNaN(target)) {
+                        algorithms.binary.target = target;
+                        algorithms.binary.state = 'running';
+                        algorithms.binary.low = 0;
+                        algorithms.binary.high = algorithms.binary.array.length - 1;
+                        algorithms.binary.found = false;
+                    }
+                }
+                binarySearchStep();
+            });
+            
+            // 插入排序事件
+            document.getElementById('insertion-reset').addEventListener('click', () => {
+                clearInterval(algorithms.insertion.interval);
+                initAlgorithms();
+            });
+            
+            document.getElementById('insertion-start').addEventListener('click', () => {
+                if (algorithms.insertion.state === 'idle') {
+                    algorithms.insertion.state = 'running';
+                    algorithms.insertion.interval = setInterval(insertionSortStep, 1500);
+                }
+            });
+            
+            document.getElementById('insertion-step').addEventListener('click', () => {
+                if (algorithms.insertion.state === 'idle') {
+                    algorithms.insertion.state = 'running';
+                }
+                insertionSortStep();
+            });
+            
+            // 归并排序事件
+            document.getElementById('merge-reset').addEventListener('click', () => {
+                clearInterval(algorithms.merge.interval);
+                initAlgorithms();
+            });
+            
+            document.getElementById('merge-start').addEventListener('click', () => {
+                if (algorithms.merge.state === 'idle') {
+                    algorithms.merge.state = 'running';
+                    algorithms.merge.interval = setInterval(mergeSortStep, 1500);
+                }
+            });
+            
+            document.getElementById('merge-step').addEventListener('click', () => {
+                if (algorithms.merge.state === 'idle') {
+                    algorithms.merge.state = 'running';
+                }
+                mergeSortStep();
+            });
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            initAlgorithms();
+            setupEventListeners();
+        });
+    </script>
+</body>
+</html>
