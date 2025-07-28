@@ -35,7 +35,12 @@ while ($row = $result->fetch_assoc()) {
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>大学时间表生成器</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genarate - Timetable System</title>
+    <link rel="shortcut icon" href="../../src/ico/ico_logo_001.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../stylesheets/style_header.css">
+    <link rel="stylesheet" href="../../stylesheets/style_all.css">
     <style>
         .timetable {
             width: 100%;
@@ -135,7 +140,7 @@ while ($row = $result->fetch_assoc()) {
     </style>
 </head>
 <body>
-    <h1>大学时间表生成器</h1>
+    <?php include("../page_all/header_page_action_generate.php") ?>
     
     <div class="controls">
         <select id="batch-select">

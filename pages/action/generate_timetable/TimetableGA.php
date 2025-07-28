@@ -1,8 +1,8 @@
 <?php
-require_once __DIR__ . '/GAConfig.php';
-require_once __DIR__ . '/Population.php';
-require_once __DIR__ . '/Chromosome.php';
-require_once __DIR__ . '../../../dbconnect.php'; // 包含您的数据库连接
+require_once './GAConfig.php';
+require_once './Population.php';
+require_once './Chromosome.php';
+require_once '../../../../dbconnect.php'; // 包含您的数据库连接
 
 class TimetableGA {
     private $batchId;

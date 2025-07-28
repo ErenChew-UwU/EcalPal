@@ -178,8 +178,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 生成时间表
 function generateTimetable(batchId) {
+    const generateBtn = document.getElementById('generate-btn');
+    const originalText = generateBtn.textContent;
+    
+    // 显示加载状态
+    generateBtn.disabled = true;
+    generateBtn.textContent = '生成中...';
+    
     fetch(`./generate_timetable/generateTimetable.php?batch_id=${batchId}`)
-        .then(response => response.json())
+        .then(response => {
+            // 首先检查HTTP状态码
+            if (!response.ok) {
+                throw new Error(`HTTP错误! 状态: ${response.status}`);
+            }
+            
+            // 然后尝试解析JSON
+            return response.json();
+        })
         .then(data => {
             if (data.status === 'success') {
                 currentTimetable = data.timetable;
@@ -187,12 +202,24 @@ function generateTimetable(batchId) {
                 initDragAndDrop();
                 document.getElementById('save-btn').disabled = false;
             } else {
+                console.error('API错误:', data);
                 alert('生成失败: ' + (data.message || '未知错误'));
             }
         })
         .catch(error => {
-            console.error('生成错误:', error);
-            alert('生成过程中出错');
+            console.error('请求错误:', error);
+            
+            // 显示更详细的错误信息
+            if (error.message.includes('Unexpected token')) {
+                alert('服务器返回了无效响应。可能是PHP脚本出错，请检查服务器日志。');
+            } else {
+                alert('生成过程中出错: ' + error.message);
+            }
+        })
+        .finally(() => {
+            // 恢复按钮状态
+            generateBtn.disabled = false;
+            generateBtn.textContent = originalText;
         });
 }
 

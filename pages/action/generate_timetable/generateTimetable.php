@@ -72,6 +72,7 @@ try {
     error_log("成功生成时间表 - 批次: $batchId");
     
     // 返回结果
+    ob_end_clean();
     header('Content-Type: application/json');
     echo json_encode($result);
     
