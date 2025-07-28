@@ -8,9 +8,9 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // 在脚本开始时清空所有输出缓冲区
-while (ob_get_level()) {
-    ob_end_clean();
-}
+    if (ob_get_length()) {
+        ob_clean(); // 清空内容但不结束缓冲
+    }  
 
 // 防止任何 HTML 输出
 register_shutdown_function(function() {
@@ -70,22 +70,31 @@ try {
     
     // 记录成功
     error_log("成功生成时间表 - 批次: $batchId");
+
+    if (ob_get_length()) {
+        ob_clean(); // 清空内容但不结束缓冲
+    }  
     
     // 返回结果
     ob_end_clean();
-    header('Content-Type: application/json');
     echo json_encode($result);
+    exit;
     
 } catch (Exception $e) {
     // 记录错误
     error_log("生成时间表错误: " . $e->getMessage());
+
+    if (ob_get_length()) {
+        ob_clean(); // 清空内容但不结束缓冲
+    }   
+
     
-    // 返回错误信息
-    header('Content-Type: application/json');
     http_response_code(500);
     echo json_encode([
         'status' => 'error',
         'message' => '生成失败: ' . $e->getMessage()
     ]);
+
+    exit;
 }
 ?>

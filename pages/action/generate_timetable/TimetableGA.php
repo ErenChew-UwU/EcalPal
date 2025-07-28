@@ -2,7 +2,7 @@
 require_once './GAConfig.php';
 require_once './Population.php';
 require_once './Chromosome.php';
-require_once '../../../../dbconnect.php'; // 包含您的数据库连接
+require_once(__DIR__ . '/../../../dbconnect.php'); // 包含您的数据库连接
 
 class TimetableGA {
     private $batchId;
