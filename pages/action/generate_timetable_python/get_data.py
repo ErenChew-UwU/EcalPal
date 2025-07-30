@@ -211,76 +211,76 @@ def fetch_batch_by_id(batch_id):
 
 
 
-{
-  "status": "success",
-  "timetable": [
-      {
-        "timetableId": "T0001",
-        "batchId": "B0001",
-        "slots": [
-            {
-                "UUID": "{randomGenerate}",
-                "subjectId": "SB0001",
-                "day": "MO",
-                "timeSlot": 1, # 用bitmap来表示在第几个（第一格是1，第二个2，第三格4）
-                "duration": 2, # 1是半个小时,2是1小时
-                "venueId": "V0001",
-                "lecturerId": "L0001"
-            },
-            {
-                "UUID": "{randomGenerate}", # 可能存在两个一样的subject，根据他的lesson可能会在一个星期里有两堂课在不同时间，但尽量是同个老师教
-                "subjectId": "SB0001",
-                "day": "MO",
-                "timeSlot": 4, # 用bitmap来表示在第几个（第一格是1，第二个2，第三格4）
-                "duration": 2, # 1是半个小时,2是1小时
-                "venueId": "V0001",
-                "lecturerId": "L0001"
-            },
-            {...}
-        ],
-        "unplaced": [
-            {
-                "UUID": "{randomGenerate}", # 可能存在两个一样的subject，根据他的lesson可能会在一个星期里有两堂课在不同时间，但尽量是同个老师教
-                "subjectId": "SB0001",
-                "duration": 2, # 1是半个小时,2是1小时
-                "preferredLecturerIds": ["L0002", "L0005"],
-                "reason": "No available venue at desired time"
-            }
-        ]
-    },
-    { # 可能同时生成多个时间表
-        "timetableId": "T0001",
-        "batchId": "B0001",
-        "slots": [
-            {
-                "UUID": "{randomGenerate}",
-                "subjectId": "SB0001",
-                "day": "MO",
-                "timeSlot": 1, # 用bitmap来表示在第几个（第一格是1，第二个2，第三格4）
-                "duration": 2, # 1是半个小时,2是1小时
-                "venueId": "V0001",
-                "lecturerId": "L0001"
-            },
-            {
-                "UUID": "{randomGenerate}", # 可能存在两个一样的subject，根据他的lesson可能会在一个星期里有两堂课在不同时间，但尽量是同个老师教
-                "subjectId": "SB0001",
-                "day": "MO",
-                "timeSlot": 4, # 用bitmap来表示在第几个（第一格是1，第二个2，第三格4）
-                "duration": 2, # 1是半个小时,2是1小时
-                "venueId": "V0001",
-                "lecturerId": "L0001"
-            },
-            {...}
-        ],
-        "unplaced": [
-            {
-                "UUID": "{randomGenerate}", # 可能存在两个一样的subject，根据他的lesson可能会在一个星期里有两堂课在不同时间，但尽量是同个老师教
-                "subjectId": "SB0001",
-                "duration": 2, # 1是半个小时,2是1小时
-                "preferredLecturerIds": ["L0002", "L0005"],
-                "reason": "No available venue at desired time"
-            }
-        ]
-    }
-  ]
-}
+# {
+#   "status": "success",
+#   "timetable": [
+#       {
+#         "timetableId": "T0001",
+#         "batchId": "B0001",
+#         "slots": [
+#             {
+#                 "UUID": "{randomGenerate}",
+#                 "subjectId": "SB0001",
+#                 "day": "MO",
+#                 "timeSlot": 1, # 用bitmap来表示在第几个（第一格是1，第二个2，第三格4）
+#                 "duration": 2, # 1是半个小时,2是1小时
+#                 "venueId": "V0001",
+#                 "lecturerId": "L0001"
+#             },
+#             {
+#                 "UUID": "{randomGenerate}", # 可能存在两个一样的subject，根据他的lesson可能会在一个星期里有两堂课在不同时间，但尽量是同个老师教
+#                 "subjectId": "SB0001",
+#                 "day": "MO",
+#                 "timeSlot": 4, # 用bitmap来表示在第几个（第一格是1，第二个2，第三格4）
+#                 "duration": 2, # 1是半个小时,2是1小时
+#                 "venueId": "V0001",
+#                 "lecturerId": "L0001"
+#             },
+#             {...}
+#         ],
+#         "unplaced": [
+#             {
+#                 "UUID": "{randomGenerate}", # 可能存在两个一样的subject，根据他的lesson可能会在一个星期里有两堂课在不同时间，但尽量是同个老师教
+#                 "subjectId": "SB0001",
+#                 "duration": 2, # 1是半个小时,2是1小时
+#                 "preferredLecturerIds": ["L0002", "L0005"],
+#                 "reason": "No available venue at desired time"
+#             }
+#         ]
+#     },
+#     { # 可能同时生成多个时间表
+#         "timetableId": "T0001",
+#         "batchId": "B0001",
+#         "slots": [
+#             {
+#                 "UUID": "{randomGenerate}",
+#                 "subjectId": "SB0001",
+#                 "day": "MO",
+#                 "timeSlot": 1, # 用bitmap来表示在第几个（第一格是1，第二个2，第三格4）
+#                 "duration": 2, # 1是半个小时,2是1小时
+#                 "venueId": "V0001",
+#                 "lecturerId": "L0001"
+#             },
+#             {
+#                 "UUID": "{randomGenerate}", # 可能存在两个一样的subject，根据他的lesson可能会在一个星期里有两堂课在不同时间，但尽量是同个老师教
+#                 "subjectId": "SB0001",
+#                 "day": "MO",
+#                 "timeSlot": 4, # 用bitmap来表示在第几个（第一格是1，第二个2，第三格4）
+#                 "duration": 2, # 1是半个小时,2是1小时
+#                 "venueId": "V0001",
+#                 "lecturerId": "L0001"
+#             },
+#             {...}
+#         ],
+#         "unplaced": [
+#             {
+#                 "UUID": "{randomGenerate}", # 可能存在两个一样的subject，根据他的lesson可能会在一个星期里有两堂课在不同时间，但尽量是同个老师教
+#                 "subjectId": "SB0001",
+#                 "duration": 2, # 1是半个小时,2是1小时
+#                 "preferredLecturerIds": ["L0002", "L0005"],
+#                 "reason": "No available venue at desired time"
+#             }
+#         ]
+#     }
+#   ]
+# }
