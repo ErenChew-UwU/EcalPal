@@ -7,6 +7,7 @@ from get_data import (
     fetch_lecturer_subject,
     fetch_batch_subject,
 )
+from fitness import calculate_fitness
 
 class Chromosome:
     def __init__(self, batch_id):
@@ -57,8 +58,12 @@ class Chromosome:
 
 # Testing 
 if __name__ == "__main__" :
+    l = 900
+    for _ in range(1000):
 
-    genes = []
-    chrom = Chromosome("B0001")
-    genes.extend(chrom.genes)
-    print(genes)
+        genes = []
+        chrom = Chromosome("B0001")
+        genes.extend(chrom.genes)
+        if calculate_fitness(genes) < l :
+            l = calculate_fitness(genes)
+    print(l)
