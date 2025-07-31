@@ -58,7 +58,7 @@ class Chromosome:
 # Testing 
 if __name__ == "__main__" :
 
-
+    genes = []
     chrom = Chromosome("B0001")
-    genes = chrom._create_genes()
+    genes.extend(chrom.genes)
     print(genes)
