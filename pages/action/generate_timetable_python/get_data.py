@@ -177,9 +177,13 @@ def fetch_all_venue_ids(conn):
     cursor.close()
     return [row['ID'] for row in results]
 
-def calculate_pair_count(conn):
+def calculate_pair_count(batches, conn):
+    if not batches:
+        return 0
     cursor = conn.cursor()
-    cursor.execute("SELECT lesson_per_week FROM batch_subject WHERE status = 'current'")
+    placeholders = ','.join(['%s'] * len(batches))  # e.g. %s,%s,%s
+    sql = f"SELECT lesson_per_week FROM batch_subject WHERE status = 'current' AND batch_id IN ({placeholders})"
+    cursor.execute(sql, batches)  # ✅ 参数化传值
     lessons = cursor.fetchall()
     cursor.close()
 

@@ -16,16 +16,16 @@ def run_ga(batch_ids, conn, generations=MAX_GENERATIONS):
     best_fitness = 0
     no_improve_count = 0
     best_individual = None
-    PAIR_COUNT = calculate_pair_count(conn)
+    PAIR_COUNT = calculate_pair_count(batch_ids,conn)
     for gen in range(generations):
         # 计算适应度
-        population = sorted(population, key=lambda chrom: -calculate_fitness(chrom, conn))
+        population = sorted(population, key=lambda chrom: -calculate_fitness(batch_ids, chrom, conn))
 
         # 保留精英
         new_population = population[:ELITISM_COUNT]
 
         while len(new_population) < POPULATION_SIZE:
-            p1, p2 = select_parents(population, conn)
+            p1, p2 = select_parents(batch_ids, population, conn)
             c1, c2 = crossover(p1, p2)
             c1 = mutate(c1, conn)
             c2 = mutate(c2, conn)
@@ -34,7 +34,7 @@ def run_ga(batch_ids, conn, generations=MAX_GENERATIONS):
         population = new_population[:POPULATION_SIZE]
 
         # 更新最优个体
-        current_best = calculate_fitness(population[0], conn)
+        current_best = calculate_fitness(batch_ids, population[0], conn)
         if current_best > best_fitness:
             best_fitness = current_best
             best_individual = copy.deepcopy(population[0])
@@ -65,8 +65,8 @@ def run_ga(batch_ids, conn, generations=MAX_GENERATIONS):
 
 if __name__ == "__main__":
     conn = get_connection()
-    batchs = {"B0001","B0002"}
+    batchs = ["B0001"]
     result = run_ga(batchs, conn)
     print(result)
-    fitness_result = calculate_fitness(result, conn)
+    fitness_result = calculate_fitness(batchs, result, conn)
     print(fitness_result)

@@ -14,8 +14,8 @@ from ga_config import (
 def is_available(bitmap, slot):
     return (bitmap & (1 << (slot - 1))) != 0
 
-def calculate_fitness(genes, conn):
-    pair_count = calculate_pair_count(conn)
+def calculate_fitness(batch_ids, genes, conn):
+    pair_count = calculate_pair_count(batch_ids, conn)
     score = pair_count * DEFAULT_SCORE_BASE         # Default Score
     penalty = 0
     lecturer_avail = fetch_lecturer_availability(conn)  # list of {lecturer_id, day, timeslot}
