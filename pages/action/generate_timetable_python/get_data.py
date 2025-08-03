@@ -193,7 +193,7 @@ def calculate_pair_count(batches, conn):
 def fetch_timetableslot_by_batch_id(batchs, conn):
     cursor = conn.cursor(dictionary=True)
     placeholders = ','.join(['%s'] * len(batchs))
-    sql = f"SELECT ts.* FROM timetableslot ts JOIN timetable t ON ts.timetable_id = t.ID WHERE t.Active = 1 AND ts.batch_id IN ({placeholders})"
+    sql = f"SELECT ts.* FROM timetableslot ts JOIN timetable t ON ts.timetable_id = t.ID WHERE t.Active = 1 AND ts.batch_id NOT IN ({placeholders})"
     cursor.execute(sql, batchs)  # 注意 batchs 需为 list/tuple
     data = cursor.fetchall()
     cursor.close()
