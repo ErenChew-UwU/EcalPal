@@ -1,4 +1,4 @@
-from get_data import fetch_lecturer_availability, fetch_venue_availability, calculate_pair_count
+from get_data import fetch_lecturer_availability, fetch_venue_availability, calculate_pair_count, fetch_timetableslot_by_batch_id
 from ga_config import (
     LECTURER_CONFLICT_WEIGHT, 
     VENUE_CONFLICT_WEIGHT, 
@@ -20,6 +20,7 @@ def calculate_fitness(batch_ids, genes, conn):
     penalty = 0
     lecturer_avail = fetch_lecturer_availability(conn)  # list of {lecturer_id, day, timeslot}
     venue_avail = fetch_venue_availability(conn)        # list of {venue_id, day, timeslot}
+    existing_slots = fetch_timetableslot_by_batch_id(batch_ids, conn)
 
     for gene1 in genes:
         for gene2 in genes:
@@ -36,6 +37,15 @@ def calculate_fitness(batch_ids, genes, conn):
                 if gene1['batchId'] == gene2['batchId']:
                     penalty += BATCH_CONFLICT_WEIGHT
 
+        for existing in existing_slots:
+            if gene1['day'] == existing['day'] and gene1['timeSlot'] == existing['timeSlot']:
+                if gene1['venueId'] == existing['venue_id']:
+                    penalty += VENUE_CONFLICT_WEIGHT
+                if gene1['lecturerId'] == existing['lecturer_id']:
+                    penalty += LECTURER_CONFLICT_WEIGHT
+                if gene1['batchId'] == existing['batch_id']:
+                    penalty += BATCH_CONFLICT_WEIGHT
+                    
         if not any(
             a['lecturer_id'] == gene1['lecturerId'] and 
             a['day'] == gene1['day'] and 

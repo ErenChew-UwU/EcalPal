@@ -190,6 +190,15 @@ def calculate_pair_count(batches, conn):
     total_lessons = sum(row[0] for row in lessons)  # 每条 lesson_per_week 加总
     return total_lessons * (total_lessons - 1) // 2  # 计算所有 pair 的组合数
 
+def fetch_timetableslot_by_batch_id(batchs, conn):
+    cursor = conn.cursor(dictionary=True)
+    placeholders = ','.join(['%s'] * len(batchs))
+    sql = f"SELECT ts.* FROM timetableslot ts JOIN timetable t ON ts.timetable_id = t.ID WHERE t.Active = 1 AND ts.batch_id IN ({placeholders})"
+    cursor.execute(sql, batchs)  # 注意 batchs 需为 list/tuple
+    data = cursor.fetchall()
+    cursor.close()
+    return data
+
 
 # {
 #   "status": "success",
