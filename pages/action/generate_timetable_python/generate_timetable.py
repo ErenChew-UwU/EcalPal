@@ -1,4 +1,4 @@
-from ga_config import MAX_GENERATIONS, ELITISM_COUNT, POPULATION_SIZE, TARGET_FITNESS_BASE, MAX_NO_IMPROVE, MINIMUN_TARGET_BASE
+from ga_config import MAX_GENERATIONS, ELITISM_COUNT, POPULATION_SIZE, TARGET_FITNESS_BASE, MAX_NO_IMPROVE, MINIMUN_TARGET_BASE, DEFAULT_SCORE_BASE
 from fitness import calculate_fitness
 from select_parent import select_parents
 from mutation import mutate
@@ -17,6 +17,7 @@ def run_ga(batch_ids, conn, generations=MAX_GENERATIONS):
     no_improve_count = 0
     best_individual = None
     PAIR_COUNT = calculate_pair_count(batch_ids,conn)
+    score = PAIR_COUNT * DEFAULT_SCORE_BASE  
     for gen in range(generations):
         # 计算适应度
         population = sorted(population, key=lambda chrom: -calculate_fitness(batch_ids, chrom, conn))
@@ -27,8 +28,11 @@ def run_ga(batch_ids, conn, generations=MAX_GENERATIONS):
         while len(new_population) < POPULATION_SIZE:
             p1, p2 = select_parents(batch_ids, population, conn)
             c1, c2 = crossover(p1, p2)
-            c1 = mutate(c1, conn)
-            c2 = mutate(c2, conn)
+            if calculate_fitness(batch_ids, c1, conn) < PAIR_COUNT * MINIMUN_TARGET_BASE:
+                c1 = mutate(c1, conn)
+
+            if calculate_fitness(batch_ids, c2, conn) < PAIR_COUNT * MINIMUN_TARGET_BASE:
+                c2 = mutate(c2, conn)
             new_population.extend([c1, c2])
 
         population = new_population[:POPULATION_SIZE]
@@ -54,12 +58,17 @@ def run_ga(batch_ids, conn, generations=MAX_GENERATIONS):
             if __name__ == "__main__":
                 print(f"Early stop at generation {gen + 1}, no improvement for {MAX_NO_IMPROVE} generations.{targetMin}")
             break
+        
+        if no_improve_count >= MAX_NO_IMPROVE * 2:
+            if __name__ == "__main__":
+                print(f"Early stop at generation {gen + 1}, no improvement for {MAX_NO_IMPROVE * 2} generations.{targetMin}")
+            break
+
 
         if __name__ == "__main__":
             progress += 1
-            if progress % (MAX_GENERATIONS / 100) == 0:
-                progresing = int((progress / generations) * 100)
-                print(f"Progress: {progresing}% | Generation {gen + 1}: Best fitness = {best_fitness}")
+            progresing = int((progress / generations) * 100)
+            print(f"Progress: {progresing}% | Generation {gen + 1}: Best fitness = {best_fitness}")
 
     return best_individual  # 返回适应度最高个体
 
