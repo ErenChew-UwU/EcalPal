@@ -1,4 +1,4 @@
-from ga_config import MAX_GENERATIONS, ELITISM_COUNT, POPULATION_SIZE, TARGET_FITNESS_BASE, MAX_NO_IMPROVE
+from ga_config import MAX_GENERATIONS, ELITISM_COUNT, POPULATION_SIZE, TARGET_FITNESS_BASE, MAX_NO_IMPROVE, MINIMUN_TARGET_BASE
 from fitness import calculate_fitness
 from select_parent import select_parents
 from mutation import mutate
@@ -44,14 +44,15 @@ def run_ga(batch_ids, conn, generations=MAX_GENERATIONS):
 
         # 目标适应度
         target = PAIR_COUNT * TARGET_FITNESS_BASE
+        targetMin = PAIR_COUNT * MINIMUN_TARGET_BASE
         if best_fitness >= target:
             if __name__ == "__main__":
                 print(f"Early stop at generation {gen + 1}, fitness: {best_fitness} | {target}")
             break
 
-        if no_improve_count >= MAX_NO_IMPROVE:
+        if no_improve_count >= MAX_NO_IMPROVE and best_fitness >= targetMin:
             if __name__ == "__main__":
-                print(f"Early stop at generation {gen + 1}, no improvement for {MAX_NO_IMPROVE} generations.")
+                print(f"Early stop at generation {gen + 1}, no improvement for {MAX_NO_IMPROVE} generations.{targetMin}")
             break
 
         if __name__ == "__main__":
