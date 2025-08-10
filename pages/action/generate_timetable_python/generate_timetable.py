@@ -7,6 +7,8 @@ from population import create_population
 from dbconnect import get_connection
 from get_data import calculate_pair_count
 import copy
+import json
+import sys
 
 
 
@@ -50,33 +52,51 @@ def run_ga(batch_ids, conn, generations=MAX_GENERATIONS):
         target = PAIR_COUNT * TARGET_FITNESS_BASE
         targetMin = PAIR_COUNT * MINIMUN_TARGET_BASE
         if best_fitness >= target:
-            if __name__ == "__main__":
-                print(f"Early stop at generation {gen + 1}, fitness: {best_fitness} | {target}")
+            # if __name__ == "__main__":
+            #     print(f"Early stop at generation {gen + 1}, fitness: {best_fitness} | {target}")
             break
 
         if no_improve_count >= MAX_NO_IMPROVE and best_fitness >= targetMin:
-            if __name__ == "__main__":
-                print(f"Early stop at generation {gen + 1}, no improvement for {MAX_NO_IMPROVE} generations.{targetMin}")
+            # if __name__ == "__main__":
+            #     print(f"Early stop at generation {gen + 1}, no improvement for {MAX_NO_IMPROVE} generations.{targetMin}")
             break
         
         if no_improve_count >= MAX_NO_IMPROVE * 2:
-            if __name__ == "__main__":
-                print(f"Early stop at generation {gen + 1}, no improvement for {MAX_NO_IMPROVE * 2} generations.{targetMin}")
+            # if __name__ == "__main__":
+            #     print(f"Early stop at generation {gen + 1}, no improvement for {MAX_NO_IMPROVE * 2} generations.{targetMin}")
             break
 
 
-        if __name__ == "__main__":
-            progress += 1
-            progresing = int((progress / generations) * 100)
-            print(f"Progress: {progresing}% | Generation {gen + 1}: Best fitness = {best_fitness}")
+        # if __name__ == "__main__":
+        #     progress += 1
+        #     progresing = int((progress / generations) * 100)
+        #     print(f"Progress: {progresing}% | Generation {gen + 1}: Best fitness = {best_fitness}")
 
     return best_individual  # 返回适应度最高个体
 
 
+# if __name__ == "__main__":
+#     conn = get_connection()
+#     batchs = ["B0001"]
+#     result = run_ga(batchs, conn)
+#     print(result)
+#     fitness_result = calculate_fitness(batchs, result, conn)
+#     print(fitness_result)
+
 if __name__ == "__main__":
+    # 从 PHP 获取参数
+    if len(sys.argv) < 2:
+        print(json.dumps({"error": "No batch IDs provided"}))
+        sys.exit(1)
+
+    try:
+        batch_ids = json.loads(sys.argv[1])  # PHP 传 JSON 字符串
+    except:
+        print(json.dumps({"error": "Invalid batch list"}))
+        sys.exit(1)
+
     conn = get_connection()
-    batchs = ["B0001"]
-    result = run_ga(batchs, conn)
-    print(result)
-    fitness_result = calculate_fitness(batchs, result, conn)
-    print(fitness_result)
+    result = run_ga(batch_ids, conn)
+
+    # 输出 JSON 给 PHP
+    print(json.dumps(result))
