@@ -35,9 +35,10 @@ $mode = '';
 $calendars = [];
 $sourceInfo = '';
 
+// ... 前面的代码保持不变 ...
+
 if (isset($_GET['from']) && $_GET['from'] === 'generate') {
     $sourceInfo = '从时间表生成工具导入';
-    // 从 temp 文件读取 GA 生成的结果
     $tempFile = __DIR__ . "/temp/timetable.json";
     if (file_exists($tempFile)) {
         $json = file_get_contents($tempFile);
@@ -64,18 +65,16 @@ if (isset($_GET['from']) && $_GET['from'] === 'generate') {
                     ];
                     $date = $day_map[$g['day']] ?? $day_map['MO'];
                     
-                    // 获取完整名称
+                    // 获取完整名称 - 修复这里的变量名
                     $subjectName = $subjects[$g['subjectId']] ?? $g['subjectId'];
                     $venueName = $venues[$g['venueId']] ?? $g['venueId'];
                     $lecturerName = $lecturers[$g['lecturerId']] ?? $g['lecturerId'];
                     
-                    $title = "{$subjectName} · {$venueName} · {$lecturerName}";
-                    
                     $events[] = [
                         'id' => $g['UUID'],
-                        'title' => $title,
-                        'start' => $date . "T" . substr($start,0,8),
-                        'end' => $date . "T" . substr($end,0,8),
+                        'title' => $subjectName, // 修复这里只显示科目名
+                        'start' => $date . "T" . $start,
+                        'end' => $date . "T" . $end,
                         'backgroundColor' => getColorForSubject($g['subjectId']),
                         'borderColor' => '#fff',
                         'textColor' => '#fff',
@@ -87,7 +86,9 @@ if (isset($_GET['from']) && $_GET['from'] === 'generate') {
                             'venueName' => $venueName,
                             'lecturerId' => $g['lecturerId'],
                             'lecturerName' => $lecturerName,
-                            'duration_slots' => intval($g['duration'])
+                            'duration_slots' => intval($g['duration']),
+                            'day' => $g['day'],
+                            'timeSlot' => $g['timeSlot']
                         ]
                     ];
                 }
@@ -126,7 +127,7 @@ if (isset($_GET['from']) && $_GET['from'] === 'generate') {
         $venueName = $venues[$g['venue_id']] ?? $g['venue_id'];
         $lecturerName = $lecturers[$g['lecturer_id']] ?? $g['lecturer_id'];
         
-        $title = "{$subjectName} · {$venueName} · {$lecturerName}";
+        $title = "{$subjectName}";
         
         $events[] = [
             'id' => 'db-' . $g['id'],
@@ -144,7 +145,9 @@ if (isset($_GET['from']) && $_GET['from'] === 'generate') {
                 'venueName' => $venueName,
                 'lecturerId' => $g['lecturer_id'],
                 'lecturerName' => $lecturerName,
-                'duration_slots' => intval($g['duration'])
+                'duration_slots' => intval($g['duration']),
+                'day' => $g['day'],
+                'timeSlot' => $g['timeSlot']
             ]
         ];
     }
@@ -202,6 +205,7 @@ function getColorForSubject($subjectId) {
       background: #f0f4f8;
       color: var(--text-dark);
       line-height: 1.6;
+      min-height: 100vh;
     }
     
     .header {
@@ -331,9 +335,6 @@ function getColorForSubject($subjectId) {
       cursor: grab;
       border-left: 3px solid var(--primary-color);
       transition: all 0.2s;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
     }
     
     .external-event:hover {
@@ -344,10 +345,12 @@ function getColorForSubject($subjectId) {
     .event-subject {
       font-weight: 600;
       color: var(--text-dark);
+      margin-bottom: 8px;
     }
     
     .event-details {
       display: flex;
+      flex-wrap: wrap;
       gap: 12px;
       font-size: 14px;
       color: var(--text-light);
@@ -357,12 +360,9 @@ function getColorForSubject($subjectId) {
       display: flex;
       align-items: center;
       gap: 4px;
-    }
-    
-    .event-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 8px;
+      background: rgba(255,255,255,0.7);
+      padding: 4px 8px;
+      border-radius: 4px;
     }
     
     .btn {
@@ -447,6 +447,7 @@ function getColorForSubject($subjectId) {
     .unsaved-count {
       font-weight: 700;
       color: #d97706;
+      font-size: 18px;
     }
     
     .save-actions {
@@ -477,24 +478,60 @@ function getColorForSubject($subjectId) {
     
     .fc .fc-event {
       border-radius: 6px;
-      padding: 4px 6px;
+      padding: 8px;
       font-size: 14px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      border: none;
     }
     
-    .fc .fc-event-title {
-      font-weight: 500;
+    .fc-event-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .fc-event-title {
+      font-weight: 600;
       margin-bottom: 2px;
     }
     
-    .fc .fc-event-detail {
+    .fc-event-details {
       font-size: 12px;
       display: flex;
-      gap: 6px;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .fc-event-detail {
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
     
     .fc .fc-daygrid-day-frame {
       background: #fff;
+    }
+    
+    .event-tooltip {
+      position: absolute;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      z-index: 100;
+      pointer-events: none;
+      max-width: 300px;
+    }
+    
+    @media (max-width: 1024px) {
+      .page-wrap {
+        flex-direction: column;
+      }
+      
+      .right {
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -560,40 +597,23 @@ function getColorForSubject($subjectId) {
       <div class="card-title">
         <i class="fas fa-plus-circle"></i> 添加新课程
       </div>
-      <div class="external-events">
-        <div class="external-event">
-          <div class="event-subject">数学基础</div>
-          <div class="event-details">
-            <div class="event-detail">
-              <i class="fas fa-map-marker-alt"></i> 教室101
-            </div>
-            <div class="event-detail">
-              <i class="fas fa-user"></i> 张教授
-            </div>
-          </div>
-          <div class="event-actions">
-            <button class="btn btn-primary" style="flex:1;">
-              <i class="fas fa-plus"></i> 添加
-            </button>
-          </div>
-        </div>
-        
-        <div class="external-event">
-          <div class="event-subject">英语高级</div>
-          <div class="event-details">
-            <div class="event-detail">
-              <i class="fas fa-map-marker-alt"></i> 语言实验室
-            </div>
-            <div class="event-detail">
-              <i class="fas fa-user"></i> 李教授
-            </div>
-          </div>
-          <div class="event-actions">
-            <button class="btn btn-primary" style="flex:1;">
-              <i class="fas fa-plus"></i> 添加
-            </button>
-          </div>
-        </div>
+      <div class="external-events" id="externalEvents">
+        <?php 
+        // 为每个科目创建可拖动事件
+        $uniqueSubjects = [];
+        foreach($subjects as $id => $name) {
+          if(!in_array($id, $uniqueSubjects)) {
+            $uniqueSubjects[] = $id;
+            $color = getColorForSubject($id);
+            echo '<div class="external-event" data-subject-id="'.$id.'" data-subject-name="'.$name.'" style="border-left-color: '.$color.';">';
+            echo '<div class="event-subject">'.$name.'</div>';
+            echo '<div class="event-details">';
+            echo '<div class="event-detail"><i class="fas fa-clock"></i> 2 课时</div>';
+            echo '</div>';
+            echo '</div>';
+          }
+        }
+        ?>
       </div>
     </div>
     
@@ -608,7 +628,7 @@ function getColorForSubject($subjectId) {
           </div>
           <div class="unsaved-text">
             <div class="unsaved-title">未保存的更改</div>
-            <div><span class="unsaved-count">3</span> 个修改</div>
+            <div><span class="unsaved-count" id="unsavedCount">0</span> 个修改</div>
           </div>
         </div>
         
@@ -628,12 +648,17 @@ function getColorForSubject($subjectId) {
 <script>
 const calendarsData = <?php echo json_encode($calendars, JSON_UNESCAPED_UNICODE); ?>;
 let unsavedCount = 0;
-const unsavedFlag = document.querySelector('.unsaved-count');
+const unsavedElement = document.getElementById('unsavedCount');
+let calendarObjs = {};
 
 // 标记未保存更改
 function markUnsaved(delta = 1) {
   unsavedCount = Math.max(0, unsavedCount + delta);
-  unsavedFlag.textContent = unsavedCount;
+  unsavedElement.textContent = unsavedCount;
+  
+  // 更新顶部指示器
+  document.querySelector('.unsaved-indicator').style.display = 
+    unsavedCount > 0 ? 'flex' : 'none';
 }
 
 // 离开页面警告
@@ -646,8 +671,7 @@ window.addEventListener('beforeunload', e => {
 
 // 初始化日历
 document.addEventListener('DOMContentLoaded', function() {
-  const calendarObjs = {};
-  
+  // 创建日历实例
   calendarsData.forEach((cal, idx) => {
     const calendarEl = document.getElementById(`calendar-${idx}`);
     
@@ -670,22 +694,61 @@ document.addEventListener('DOMContentLoaded', function() {
       editable: true,
       droppable: true,
       events: cal.events || [],
-      eventReceive: () => markUnsaved(1),
+      eventReceive: (info) => {
+        // 设置新事件的属性
+        const subjectId = info.draggedEl.dataset.subjectId;
+        const subjectName = info.draggedEl.dataset.subjectName;
+        
+        info.event.setExtendedProp('subjectId', subjectId);
+        info.event.setExtendedProp('subjectName', subjectName);
+        info.event.setProp('title', subjectName);
+        info.event.setProp('backgroundColor', getColorForSubject(subjectId));
+        
+        markUnsaved(1);
+      },
       eventDrop: () => markUnsaved(1),
       eventResize: () => markUnsaved(1),
       eventChange: () => markUnsaved(1),
+      eventClick: (info) => {
+        // 显示事件详情
+        const event = info.event;
+        const props = event.extendedProps;
+        
+        const tooltip = document.createElement('div');
+        tooltip.className = 'event-tooltip';
+        tooltip.innerHTML = `
+          <div><strong>${props.subjectName}</strong></div>
+          <div>地点: ${props.venueName || '未设置'}</div>
+          <div>讲师: ${props.lecturerName || '未设置'}</div>
+          <div>时间: ${formatTime(event.start)} - ${formatTime(event.end)}</div>
+          <div>时长: ${props.duration_slots} 课时</div>
+        `;
+        
+        tooltip.style.left = `${info.jsEvent.pageX + 10}px`;
+        tooltip.style.top = `${info.jsEvent.pageY + 10}px`;
+        document.body.appendChild(tooltip);
+        
+        // 5秒后移除提示
+        setTimeout(() => {
+          if (document.body.contains(tooltip)) {
+            document.body.removeChild(tooltip);
+          }
+        }, 5000);
+      },
       locale: 'zh-cn',
       eventContent: function(arg) {
         const subject = arg.event.extendedProps.subjectName || '未知科目';
-        const venue = arg.event.extendedProps.venueName || '未知地点';
-        const lecturer = arg.event.extendedProps.lecturerName || '未知讲师';
+        const venue = arg.event.extendedProps.venueName || '未设置地点';
+        const lecturer = arg.event.extendedProps.lecturerName || '未设置讲师';
         
         return {
           html: `
-            <div class="fc-event-title">${subject}</div>
-            <div class="fc-event-detail">
-              <span><i class="fas fa-map-marker-alt"></i> ${venue}</span>
-              <span><i class="fas fa-user"></i> ${lecturer}</span>
+            <div class="fc-event-content">
+              <div class="fc-event-title">${subject}</div>
+              <div class="fc-event-details">
+                <div class="fc-event-detail"><i class="fas fa-map-marker-alt"></i> ${venue}</div>
+                <div class="fc-event-detail"><i class="fas fa-user"></i> ${lecturer}</div>
+              </div>
             </div>
           `
         };
@@ -694,6 +757,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     calendar.render();
     calendarObjs[cal.id] = calendar;
+  });
+
+  // 使外部事件可拖动
+  document.querySelectorAll('.external-event').forEach(el => {
+    el.draggable = true;
+    
+    el.addEventListener('dragstart', (ev) => {
+      ev.dataTransfer.setData('text/plain', JSON.stringify({
+        subjectId: el.dataset.subjectId,
+        subjectName: el.dataset.subjectName
+      }));
+    });
   });
 
   // 保存按钮事件
@@ -783,6 +858,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+
+// 辅助函数：格式化时间
+function formatTime(date) {
+  return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+}
+
+// 获取科目颜色
+function getColorForSubject(subjectId) {
+  const colors = [
+    '#4361ee', '#3f37c9', '#4cc9f0', '#4895ef', '#560bad',
+    '#7209b7', '#b5179e', '#f72585', '#e63946', '#f77f00',
+    '#fcbf49', '#2a9d8f', '#588157', '#3a5a40', '#8ac926'
+  ];
+  const index = [...subjectId].reduce((sum, char) => sum + char.charCodeAt(0), 0) % colors.length;
+  return colors[index];
+}
 </script>
 </body>
 </html>
