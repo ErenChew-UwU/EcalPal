@@ -84,19 +84,23 @@ def run_ga(batch_ids, conn, generations=MAX_GENERATIONS):
 #     print(fitness_result)
 
 if __name__ == "__main__":
-    # 从 PHP 获取参数
-    if len(sys.argv) < 2:
-        print(json.dumps({"error": "No batch IDs provided"}))
+    # 从 stdin 获取 JSON
+    batch_json = sys.stdin.read().strip()
+    try:
+        batch_list = json.loads(batch_json)
+    except json.JSONDecodeError:
+        print(json.dumps({"error": "Invalid JSON"}))
         sys.exit(1)
 
-    try:
-        batch_ids = json.loads(sys.argv[1])  # PHP 传 JSON 字符串
-    except:
+    if not isinstance(batch_list, list) or not batch_list:
         print(json.dumps({"error": "Invalid batch list"}))
         sys.exit(1)
 
+    # 连接数据库
     conn = get_connection()
-    result = run_ga(batch_ids, conn)
 
-    # 输出 JSON 给 PHP
-    print(json.dumps(result))
+    # 调用你的 GA 算法
+    result = run_ga(batch_list, conn)
+
+    # 输出结果 JSON
+    print(json.dumps(result, ensure_ascii=False))
