@@ -14,6 +14,7 @@ function timeslot_to_time($slot) {
 $subjects = [];
 $venues = [];
 $lecturers = [];
+$batches =[];
 
 $res = $conn->query("SELECT ID, fullname FROM subject");
 while ($r = $res->fetch_assoc()) { 
@@ -30,6 +31,11 @@ while ($r = $res->fetch_assoc()) {
     $lecturers[$r['ID']] = $r['name']; 
 }
 
+$res = $conn->query("SELECT ID, course_name FROM batch");
+while ($r = $res->fetch_assoc()) { 
+    $batches[$r['ID']] = $r['course_name']; 
+}
+
 // 判断模式
 $mode = '';
 $calendars = [];
@@ -38,7 +44,7 @@ $sourceInfo = '';
 // ... 前面的代码保持不变 ...
 
 if (isset($_GET['from']) && $_GET['from'] === 'generate') {
-    $sourceInfo = '从时间表生成工具导入';
+    $sourceInfo = 'Import from the Timetable Generator';
     $tempFile = __DIR__ . "/temp/timetable.json";
     if (file_exists($tempFile)) {
         $json = file_get_contents($tempFile);
@@ -94,7 +100,7 @@ if (isset($_GET['from']) && $_GET['from'] === 'generate') {
                 }
                 $calendars[] = [
                     'id' => $batchId,
-                    'title' => "批次 {$batchId}",
+                    'title' => $batches[$batchId],
                     'events' => $events,
                     'batchId' => $batchId
                 ];
@@ -102,7 +108,7 @@ if (isset($_GET['from']) && $_GET['from'] === 'generate') {
         }
     }
 } elseif (!empty($_GET['timetable_id'])) {
-    $sourceInfo = '从数据库加载的时间表';
+    $sourceInfo = 'Timetable loaded from database';
     // 从数据库读取已有时间表
     $mode = 'db';
     $timetable_id = $conn->real_escape_string($_GET['timetable_id']);
@@ -542,7 +548,7 @@ function getColorForSubject($subjectId) {
       <i class="fas fa-calendar-alt"></i>
     </div>
     <div>
-      <strong>时间表编辑系统</strong>
+      <strong>Ecalpal</strong>
       <div class="source-info">
         <?php echo $sourceInfo; ?>
       </div>
@@ -550,7 +556,7 @@ function getColorForSubject($subjectId) {
   </div>
   <div>
     <button onclick="window.location.href='./dashboardTimetable.php'" class="btn btn-outline">
-      <i class="fas fa-arrow-left"></i> 返回仪表盘
+      <i class="fas fa-arrow-left"></i> Back to Dashborad
     </button>
   </div>
 </div>
@@ -563,37 +569,83 @@ function getColorForSubject($subjectId) {
           <div class="empty-icon">
             <i class="fas fa-calendar-times"></i>
           </div>
-          <div class="empty-text">没有时间表数据</div>
-          <p>请从仪表盘打开已有时间表或生成新的时间表</p>
+          <div class="empty-text">Not have Timetable Data</div>
+          <p>Please open an existing timetable from the dashboard or generate a new timetable</p>
         </div>
       </div>
     <?php else: ?>
       <?php foreach ($calendars as $idx => $calendar): ?>
         <div class="calendar-card">
-          <div class="calendar-title">
-            <div><?php echo $calendar['title']; ?></div>
-            <div class="batch-info">
-              <span class="batch-id">
-                <?php 
-                  if (!empty($calendar['batchId'])) {
-                    echo $calendar['batchId'];
-                  } elseif (!empty($calendar['timetable_id'])) {
-                    echo "时间表ID: " . $calendar['timetable_id'];
-                  }
-                ?>
-              </span>
-              <i class="fas fa-info-circle"></i>
-              <span><?php echo count($calendar['events']); ?> 个课程</span>
-            </div>
+        <div class="calendar-title">
+          <div><?php echo $calendar['title']; ?></div>
+          <div class="batch-info">
+            <span class="batch-id">
+              <?php 
+                if (!empty($calendar['batchId'])) {
+                  echo $calendar['batchId'];
+                } elseif (!empty($calendar['timetable_id'])) {
+                  echo "Timetable ID: " . $calendar['timetable_id'];
+                }
+              ?>
+            </span>
+            <i class="fas fa-info-circle"></i>
+            <span><?php echo count($calendar['events']); ?> Subjects</span>
           </div>
-          <div id="calendar-<?php echo $idx; ?>" style="min-height: 500px;"></div>
         </div>
+
+        <table border="1" cellpadding="6" cellspacing="0" style="width:100%; text-align:center; border-collapse:collapse;">
+          <thead>
+            <tr>
+              <th style="width:80px;">Time</th>
+              <th>Monday</th>
+              <th>Tuesday</th>
+              <th>Wednesday</th>
+              <th>Thursday</th>
+              <th>Friday</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php
+            // 生成 16 个时间段（9:00 到 17:00，每 30 分钟一格）
+            for ($slot = 0; $slot < 16; $slot++) {
+                $startTime = date("H:i", strtotime("09:00") + $slot * 30 * 60);
+                $endTime = date("H:i", strtotime("09:00") + ($slot + 1) * 30 * 60);
+                echo "<tr>";
+                echo "<td>{$startTime} - {$endTime}</td>";
+
+                // 循环 5 天（MO, TU, WE, TH, FR）
+                $days = ['MO', 'TU', 'WE', 'TH', 'FR'];
+                foreach ($days as $dayCode) {
+                    // 找出该时间段的课程
+                    $cellContent = '';
+                    foreach ($calendar['events'] as $event) {
+                        if ($event['extendedProps']['day'] === $dayCode) {
+                            // 转成时间槽编号
+                            $eventSlot = intval($event['extendedProps']['timeSlot']);
+                            $eventDuration = intval($event['extendedProps']['duration_slots']);
+                            if ($slot >= $eventSlot && $slot < $eventSlot + $eventDuration) {
+                                $cellContent = $event['extendedProps']['subjectName'] . "<br>"
+                                              . "<small>" . $event['extendedProps']['venueName'] . "</small><br>"
+                                              . "<small>" . $event['extendedProps']['lecturerName'] . "</small>";
+                                break;
+                            }
+                        }
+                    }
+                    echo "<td>" . ($cellContent ?: '') . "</td>";
+                }
+                echo "</tr>";
+            }
+            ?>
+          </tbody>
+        </table>
+      </div>
+
       <?php endforeach; ?>
     <?php endif; ?>
   </div>
 
   <div class="right">
-    <div class="card">
+    <!-- <div class="card">
       <div class="card-title">
         <i class="fas fa-plus-circle"></i> 添加新课程
       </div>
@@ -615,11 +667,11 @@ function getColorForSubject($subjectId) {
         }
         ?>
       </div>
-    </div>
+    </div> -->
     
     <div class="card">
       <div class="card-title">
-        <i class="fas fa-save"></i> 保存更改
+        <i class="fas fa-save"></i> Save
       </div>
       <div class="save-area">
         <div class="unsaved-indicator">
@@ -627,14 +679,14 @@ function getColorForSubject($subjectId) {
             <i class="fas fa-exclamation"></i>
           </div>
           <div class="unsaved-text">
-            <div class="unsaved-title">未保存的更改</div>
-            <div><span class="unsaved-count" id="unsavedCount">0</span> 个修改</div>
+            <div class="unsaved-title">Unsaved changes</div>
+            <div><span class="unsaved-count" id="unsavedCount">0</span> Modifications</div>
           </div>
         </div>
         
         <div class="save-actions">
           <button id="saveAll" class="btn btn-primary" style="flex:1;">
-            <i class="fas fa-save"></i> 保存到数据库
+            <i class="fas fa-save"></i> Save to database
           </button>
           <button id="resetBtn" class="btn btn-outline">
             <i class="fas fa-undo"></i>
