@@ -607,9 +607,9 @@ function getColorForSubject($subjectId) {
           <tbody>
             <?php
             // 生成 16 个时间段（9:00 到 17:00，每 30 分钟一格）
-            for ($slot = 0; $slot < 16; $slot++) {
-                $startTime = date("H:i", strtotime("09:00") + $slot * 30 * 60);
-                $endTime = date("H:i", strtotime("09:00") + ($slot + 1) * 30 * 60);
+            for ($slot = 1; $slot < 17; $slot++) {
+                $startTime = date("H:i", strtotime("09:00") + ($slot - 1) * 30 * 60);
+                $endTime = date("H:i", strtotime("09:00") + ($slot) * 30 * 60);
                 echo "<tr>";
                 echo "<td>{$startTime} - {$endTime}</td>";
 
