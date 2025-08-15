@@ -48,8 +48,10 @@ $result = $conn->query($sql);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ecalpal | Generate Timetable</title>
+    <link rel="shortcut icon" href="../../src/ico/ico_logo_001.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../../stylesheets/style_header.css">
+    <link rel="stylesheet" href="../../stylesheets/style_all.css">
     <style>
         :root {
             --primary-color: #4361ee;
@@ -424,7 +426,7 @@ $result = $conn->query($sql);
     </style>
 </head>
 <body>
-    <?php include("../page_all/header_index.php"); ?>
+    <?php include("../page_all/header_page_action.php"); ?>
 
     <div class="container">
         <div class="page-title">

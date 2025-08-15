@@ -25,9 +25,5 @@
                     <a href="./dashboardVenue.php"><i class="fas fa-building"></i> Venue</a>
                 </div>
             </div>
-            <a href="./genaralSetting.php" class="nav-link">
-                <i class="fas fa-cog"></i>
-                <span>Setting</span>
-            </a>
         </div>
     </header>

@@ -14,7 +14,20 @@ include_once("./dbconnect.php");
     <link rel="stylesheet" href="./stylesheets/style_header.css">
     <link rel="stylesheet" href="./stylesheets/style_all.css">
     <style>
-        
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #eef2ff;
+            --secondary-color: #3f37c9;
+            --success-color: #38b000;
+            --warning-color: #ff9e00;
+            --danger-color: #e5383b;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --light-bg: #f8fafc;
+            --border-color: #e2e8f0;
+            --card-shadow: 0 10px 20px rgba(0,0,0,0.05), 0 6px 6px rgba(0,0,0,0.04);
+            --hover-shadow: 0 15px 30px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.07);
+        }
         /* Main Content Styles */
         .container {
             max-width: 1400px;
@@ -235,7 +248,17 @@ include_once("./dbconnect.php");
             flex-direction: column;
             align-items: center;
             text-align: center;
+            cursor: pointer;
         }
+
+        .future {
+            background: #e0e0e0; /* 灰色背景 */
+            color: #999; /* 灰色文字 */
+            cursor: not-allowed;
+            opacity: 0.6; /* 整体变暗 */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
         
         .function-card:hover {
             transform: translateY(-5px);
@@ -373,7 +396,7 @@ include_once("./dbconnect.php");
                 </div>
                 <div class="card-body">
                     <div class="database-grid">
-                        <a href="./pages/dashboardBatch.php" class="db-item">
+                        <a href="./pages/dashboardBatch.php" class="db-item future">
                             <div class="db-icon batch">
                                 <i class="fas fa-users"></i>
                             </div>
@@ -385,19 +408,19 @@ include_once("./dbconnect.php");
                             </div>
                             <div class="db-title">Lecturer</div>
                         </a>
-                        <a href="./pages/dashboardStudent.php" class="db-item">
+                        <a href="./pages/dashboardStudent.php" class="db-item future">
                             <div class="db-icon student">
                                 <i class="fas fa-user-graduate"></i>
                             </div>
                             <div class="db-title">Student</div>
                         </a>
-                        <a href="./pages/dashboardSubject.php" class="db-item">
+                        <a href="./pages/dashboardSubject.php" class="db-item future">
                             <div class="db-icon subject">
                                 <i class="fas fa-book"></i>
                             </div>
                             <div class="db-title">Subject</div>
                         </a>
-                        <a href="./pages/dashboardVenue.php" class="db-item">
+                        <a href="./pages/dashboardVenue.php" class="db-item future">
                             <div class="db-icon venue">
                                 <i class="fas fa-building"></i>
                             </div>
@@ -424,7 +447,7 @@ include_once("./dbconnect.php");
                 <p class="function-desc">Automatically create optimized schedules based on current data</p>
             </div>
             
-            <div class="function-card">
+            <div class="function-card future">
                 <div class="function-icon export">
                     <i class="fas fa-file-export"></i>
                 </div>
@@ -432,7 +455,7 @@ include_once("./dbconnect.php");
                 <p class="function-desc">Export timetable data to Excel, PDF or other formats</p>
             </div>
             
-            <div class="function-card">
+            <div class="function-card future">
                 <div class="function-icon import">
                     <i class="fas fa-file-import"></i>
                 </div>
@@ -440,7 +463,7 @@ include_once("./dbconnect.php");
                 <p class="function-desc">Import course data from external sources</p>
             </div>
             
-            <div class="function-card">
+            <div class="function-card future">
                 <div class="function-icon manage">
                     <i class="fas fa-user-cog"></i>
                 </div>
@@ -448,7 +471,7 @@ include_once("./dbconnect.php");
                 <p class="function-desc">Add, edit or remove system users and permissions</p>
             </div>
             
-            <div class="function-card">
+            <div class="function-card future">
                 <div class="function-icon report">
                     <i class="fas fa-chart-bar"></i>
                 </div>
@@ -456,7 +479,7 @@ include_once("./dbconnect.php");
                 <p class="function-desc">Create detailed reports on resource utilization</p>
             </div>
             
-            <div class="function-card">
+            <div class="function-card future">
                 <div class="function-icon setting">
                     <i class="fas fa-sliders-h"></i>
                 </div>
@@ -472,4 +495,10 @@ include_once("./dbconnect.php");
         <p>Timetable Management System v2.0</p>
     </footer>
 </body>
+<script>
+document.querySelector('.function-card .function-icon.generate').parentElement
+    .addEventListener('click', function() {
+        window.location.href = './pages/action/createTimetable.php';
+    });
+</script>
 </html>

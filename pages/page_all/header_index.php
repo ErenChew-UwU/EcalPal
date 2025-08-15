@@ -10,7 +10,7 @@
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
-            <a href="./pages/action/createTimetable.php" class="nav-link">
+            <a href="./pages/dashboardTimetable.php" class="nav-link">
                 <i class="fas fa-calendar-alt"></i>
                 <span>Timetable</span>
             </a>
@@ -25,9 +25,5 @@
                     <a href="./pages/dashboardVenue.php"><i class="fas fa-building"></i> Venue</a>
                 </div>
             </div>
-            <a href="./pages/genaralSetting.php" class="nav-link">
-                <i class="fas fa-cog"></i>
-                <span>Setting</span>
-            </a>
         </div>
     </header>

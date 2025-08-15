@@ -13,7 +13,20 @@ include_once("../dbconnect.php");
     <link rel="stylesheet" href="../stylesheets/style_header.css">
     <link rel="stylesheet" href="../stylesheets/style_all.css">
     <style>
-        
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #eef2ff;
+            --secondary-color: #3f37c9;
+            --success-color: #38b000;
+            --warning-color: #ff9e00;
+            --danger-color: #e5383b;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --light-bg: #f8fafc;
+            --border-color: #e2e8f0;
+            --card-shadow: 0 10px 20px rgba(0,0,0,0.05), 0 6px 6px rgba(0,0,0,0.04);
+            --hover-shadow: 0 15px 30px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.07);
+        }
         /* Main Content Styles */
         .container {
             max-width: 1400px;
