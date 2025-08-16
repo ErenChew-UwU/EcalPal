@@ -27,6 +27,10 @@ include_once("../dbconnect.php");
             --border-color: #e2e8f0;
             --card-shadow: 0 10px 20px rgba(0,0,0,0.05), 0 6px 6px rgba(0,0,0,0.04);
             --hover-shadow: 0 15px 30px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.07);
+            --modal-backdrop: rgba(0,0,0,0.7);
+            --modal-border-radius: 16px;
+            --modal-header-height: 70px;
+            --modal-footer-height: 70px;
         }
         /* Main Content Styles */
         .container {
@@ -337,86 +341,252 @@ include_once("../dbconnect.php");
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.6);
+            background-color: var(--modal-backdrop);
             justify-content: center;
             align-items: center;
+            animation: fadeIn 0.3s ease;
         }
-
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
         .modal-content {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            width: 80%;
-            max-width: 900px;
-            max-height: 80%;
-            overflow-y: auto;
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            padding: 0;
+            border-radius: var(--modal-border-radius);
+            width: 90%;
+            max-width: 860px;
+            max-height: 85vh;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            transform: translateY(-20px);
+            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            justify-content: center;
         }
-
+        
+        @keyframes slideUp {
+            to { transform: translateY(0); }
+        }
+        
+        /* 模态框头部 */
         .modal-header {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
+            color: white;
+            padding: 0 25px;
+            height: var(--modal-header-height);
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            border-top-left-radius: var(--modal-border-radius);
+            border-top-right-radius: var(--modal-border-radius);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-
-        .time-grid {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 5px;
+        
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-
-        .time-label {
-            font-weight: bold;
-            text-align: center;
-            width: 140px;
+        
+        .modal-title i {
+            font-size: 26px;
         }
-
-        .day-header {
-            font-weight: bold;
-            text-align: center;
-            background: #f0f0f0;
-        }
-
-        .time-cell {
-            height: 30px;
-            background: #eee;
-            cursor: pointer;
-        }
-
-        .time-cell.available {
-            background: #4CAF50;
-            color: white;
-        }
-
-        .time-cell:hover {
-            filter: brightness(1.2);
-        }
-
-        /* 添加加载和错误状态样式 */
-        .loading, .error {
-            grid-column: 1 / span 8;
-            text-align: center;
-            padding: 30px;
-            font-size: 18px;
-        }
-
-        .error {
-            color: var(--danger-color);
-        }
-
-        /* 关闭按钮样式 */
+        
         .close {
             cursor: pointer;
-            font-size: 28px;
-            color: #aaa;
-            padding: 0 10px;
+            font-size: 32px;
+            color: rgba(255,255,255,0.8);
+            transition: all 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
         }
-
+        
         .close:hover {
-            color: #333;
+            color: white;
+            background: rgba(255,255,255,0.2);
+            transform: rotate(90deg);
         }
-
+        
+        /* 时间表内容区域 */
+        .modal-body {
+            padding: 20px;
+            overflow: auto;
+            max-height: calc(85vh - var(--modal-header-height) - var(--modal-footer-height) - 100px);
+            
+        }
+        
+        .time-grid {
+            display: grid;
+            grid-template-columns: 100px repeat(5, 1fr);
+            gap: 8px;
+            width: 100%;
+            min-width: 800px;
+        }
+        
+        .time-label, .day-header {
+            font-weight: 600;
+            padding: 12px;
+            text-align: center;
+            background: var(--light-bg);
+            border-radius: 8px;
+            color: var(--text-dark);
+        }
+        
+        .day-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            font-size: 15px;
+            box-shadow: 0 2px 5px rgba(67, 97, 238, 0.2);
+        }
+        
+        .day-header .day-name {
+            font-size: 16px;
+            font-weight: 700;
+        }
+        
+        .time-slot {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            min-height: 80px;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .time-slot:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--hover-shadow);
+            border-color: var(--accent-color);
+            z-index: 2;
+        }
+        
+        .time-slot.lecture {
+            background: linear-gradient(135deg, #eef2ff, #dbeafe);
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .time-slot.lab {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .time-slot.free {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-left: 4px solid #cbd5e1;
+        }
+        
+        .slot-content {
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        
+        .slot-title {
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--text-dark);
+        }
+        
+        .slot-details {
+            color: var(--text-light);
+            font-size: 12px;
+        }
+        
+        .slot-time {
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--accent-color);
+            background: rgba(67, 97, 238, 0.1);
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+        
+        /* 模态框底部 */
+        .modal-footer {
+            padding: 15px 25px;
+            background: var(--light-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+        
+        .lecture-legend {
+            background: linear-gradient(135deg, #eef2ff, #dbeafe);
+            border-left: 3px solid var(--accent-color);
+        }
+        
+        .lab-legend {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border-left: 3px solid var(--success-color);
+        }
+        
+        .free-legend {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-left: 3px solid #cbd5e1;
+        }
+        
+        /* 加载状态 */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 50px;
+            text-align: center;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(67, 97, 238, 0.2);
+            border-top: 5px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         
         /* Responsive Design */
         @media (max-width: 768px) {
@@ -579,11 +749,11 @@ include_once("../dbconnect.php");
                                 
                                 // View 按钮
                                 echo "<button class='action-btn view-btn' onclick=\"showTable('{$row['timetable_id']}')\">";
-                                echo "<i class='fas fa-calendar-alt'></i> View";
+                                echo "<i class='fas fa-calendar-alt'></i> Preview";
                                 echo "</button>";
                                 
                                 // Edit 按钮
-                                echo "<a href='./editTimetable.php?timetable={$row['timetable_id']}' class='action-btn edit-btn'>";
+                                echo "<a href='./action/editTimetable.php?timetable={$row['timetable_id']}' class='action-btn edit-btn'>";
                                 echo "<i class='fas fa-edit'></i> Edit";
                                 echo "</a> ";
 
@@ -643,115 +813,66 @@ include_once("../dbconnect.php");
             });
         });
 
-        // 获取可用性数据的函数
-        function fetchAvailability(type, id) {
-            return fetch(`get_availability.php?type=${type}&id=${id}`)
-                .then(response => response.json())
-                .catch(error => {
-                    console.error('Error fetching availability:', error);
-                    return { error: 'Failed to fetch availability data' };
+        function showTable(timetableId) {
+            const modal = document.getElementById('timetable-modal');
+            const content = document.getElementById('timetable-content');
+            const title = document.getElementById('timetable-title');
+
+            // 设置标题
+            title.textContent = `Timetable: ${timetableId}`;
+            
+            // 显示加载中
+            content.innerHTML = '<div class="loading">Loading timetable...</div>';
+            modal.style.display = 'flex';
+
+            // 请求 PHP API 获取时间表内容
+            fetch(`get_timetable_preview.php?timetable_id=${timetableId}`)
+                .then(res => res.text())
+                .then(html => {
+                    content.innerHTML = html;
+                })
+                .catch(err => {
+                    content.innerHTML = `<div class="error">Error loading timetable</div>`;
                 });
         }
 
-        // 显示可用时间模态框
-        async function showAvailability(type, id, name) {
-            const modal = document.getElementById('availability-modal');
-            const modalTitle = document.getElementById('modal-title');
-            
-            // 设置标题
-            modalTitle.textContent = `${name} Availability`;
-            
-            // 显示加载状态
-            const timeGrid = document.getElementById('time-grid');
-            timeGrid.innerHTML = '<div class="loading">Loading availability data...</div>';
-            modal.style.display = 'flex';
-            
-            try {
-                // 获取可用性数据
-                const response = await fetchAvailability(type, id);
-                
-                if (response.error) {
-                    timeGrid.innerHTML = `<div class="error">${response.error}</div>`;
-                    return;
-                }
-                
-                // 填充时间网格
-                populateTimeGrid(response.availability);
-            } catch (error) {
-                console.error('Error:', error);
-                timeGrid.innerHTML = '<div class="error">Error loading availability data</div>';
-            }
-        }
-        
-        // 填充时间网格
-        function populateTimeGrid(availabilityData) {
-            const timeGrid = document.getElementById('time-grid');
-            timeGrid.innerHTML = '';
-            
-            // 确保网格列数正确（7天 + 时间列）
-            timeGrid.style.gridTemplateColumns = 'repeat(8, 1fr)';
-            
-            // 创建网格标题
-            const timeLabel = document.createElement('div');
-            timeLabel.className = 'time-label';
-            timeLabel.textContent = 'Time';
-            timeGrid.appendChild(timeLabel);
-            
-            // 添加星期标题
-            const days = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
-            days.forEach(day => {
-                const dayHeader = document.createElement('div');
-                dayHeader.className = 'day-header';
-                dayHeader.textContent = day;
-                timeGrid.appendChild(dayHeader);
-            });
-            
-            // 创建时间单元格 - 16个时间段（半小时间隔）
-            for (let i = 0; i < 16; i++) {
-                // 计算时间：从9:00开始，每30分钟增加
-                const startHour = 9 + Math.floor(i / 2);
-                const startMinutes = (i % 2) * 30;
-                const endHour = 9 + Math.floor((i + 1) / 2);
-                const endMinutes = ((i + 1) % 2) * 30;
-                const timeString = `${startHour}:${startMinutes === 0 ? '00' : startMinutes} ~ ${endHour}:${endMinutes === 0 ? '00' : endMinutes}`;
-                
-                // 时间标签
-                const timeLabel = document.createElement('div');
-                timeLabel.className = 'time-label';
-                timeLabel.textContent = timeString;
-                timeGrid.appendChild(timeLabel);
-                
-                // 每天的时间单元格
-                days.forEach(day => {
-                    const timeCell = document.createElement('div');
-                    timeCell.className = 'time-cell';
-                    
-                    // 检查该时间段是否可用
-                    if (availabilityData[day] && (availabilityData[day] >> i) & 1) {
-                        timeCell.classList.add('available');
-                    }
-                    
-                    timeGrid.appendChild(timeCell);
-                });
-            }
-        }
-        
-        // 关闭模态框
-        function closeModal() {
-            document.getElementById('availability-modal').style.display = 'none';
+        function closeTimetableModal() {
+            document.getElementById('timetable-modal').style.display = 'none';
         }
     </script>
 
-    <!-- 可用时间模态框 -->
-    <div id="availability-modal" class="modal">
+    <!-- 时间表模态框 -->
+    <div id="timetable-modal" class="modal">
         <div class="modal-content">
-            <div id="modal-header" class="modal-header">
-                <span id="modal-title">Availability</span>
-                <span class="close" onclick="closeModal()">&times;</span>
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span id="timetable-title">Timetable: T0001</span>
+                </div>
+                <span class="close" onclick="closeTimetableModal()">&times;</span>
             </div>
-            <div id="time-grid" class="time-grid"></div>
+            
+            <div class="modal-body">
+                <div id="timetable-content" class="time-grid">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color lecture-legend"></div>
+                        <span>Lecture</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color free-legend"></div>
+                        <span>Free Period</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+
 </body>
 </html>
 

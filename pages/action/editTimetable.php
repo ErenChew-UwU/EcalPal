@@ -498,6 +498,113 @@ function getColorForSubject($subjectId) {
       pointer-events: none;
       max-width: 300px;
     }
+
+    /* 时间表内容区域 */
+    .modal-body {
+        padding: 20px;
+        overflow: auto;
+        max-height: calc(85vh - var(--modal-header-height) - var(--modal-footer-height) - 100px);
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .time-table-container {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .time-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 800px;
+        table-layout: fixed;
+    }
+
+    .time-table th, .time-table td {
+        padding: 12px 15px;
+        text-align: center;
+        border: 1px solid var(--border-color);
+        height: 80px;
+        vertical-align: top;
+    }
+
+    .time-table th {
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        color: white;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+    }
+
+    .time-table th.time-header {
+        background: var(--light-bg);
+        color: var(--text-dark);
+        font-weight: 700;
+    }
+
+    .time-table tr:nth-child(even) {
+        background-color: #f9fbfd;
+    }
+
+    .time-table tr:hover {
+        background-color: #f0f7ff;
+    }
+
+    .time-cell {
+        min-height: 80px;
+        vertical-align: top;
+        position: relative;
+    }
+
+    .time-cell-content {
+        padding: 10px;
+        border-radius: 6px;
+        min-height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .time-cell.lecture .time-cell-content {
+        background: linear-gradient(135deg, #eef2ff, #dbeafe);
+        border-left: 4px solid var(--accent-color);
+    }
+
+    .time-cell.lab .time-cell-content {
+        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        border-left: 4px solid var(--success-color);
+    }
+
+    .time-cell.free .time-cell-content {
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-left: 4px solid #cbd5e1;
+    }
+
+    .cell-title {
+        font-weight: 700;
+        margin-bottom: 5px;
+        color: var(--text-dark);
+        font-size: 14px;
+    }
+
+    .cell-details {
+        color: var(--text-light);
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .cell-time {
+        position: absolute;
+        top: 6px;
+        right: 8px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--accent-color);
+        background: rgba(67, 97, 238, 0.1);
+        padding: 2px 6px;
+        border-radius: 10px;
+    }
     
     @media (max-width: 1024px) {
       .page-wrap {
@@ -512,24 +619,6 @@ function getColorForSubject($subjectId) {
 </head>
 <body>
   <?php include("../page_all/header_page_action.php"); ?>
-<!-- <div class="header">
-  <div class="logo">
-    <div class="logo-icon">
-      <i class="fas fa-calendar-alt"></i>
-    </div>
-    <div>
-      <strong>Ecalpal</strong>
-      <div class="source-info">
-        <?php echo $sourceInfo; ?>
-      </div>
-    </div>
-  </div>
-  <div>
-    <button onclick="window.location.href='./dashboardTimetable.php'" class="btn btn-outline">
-      <i class="fas fa-arrow-left"></i> Back to Dashborad
-    </button>
-  </div>
-</div> -->
 
 <div class="page-wrap">
   <div class="left" id="leftCalendars">
@@ -563,50 +652,65 @@ function getColorForSubject($subjectId) {
           </div>
         </div>
 
-        <table border="1" cellpadding="6" cellspacing="0" style="width:100%; text-align:center; border-collapse:collapse;">
-          <thead>
-            <tr>
-              <th style="width:80px;">Time</th>
-              <th>Monday</th>
-              <th>Tuesday</th>
-              <th>Wednesday</th>
-              <th>Thursday</th>
-              <th>Friday</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php
-            // 生成 16 个时间段（9:00 到 17:00，每 30 分钟一格）
-            for ($slot = 1; $slot < 17; $slot++) {
-                $startTime = date("H:i", strtotime("09:00") + ($slot - 1) * 30 * 60);
-                $endTime = date("H:i", strtotime("09:00") + ($slot) * 30 * 60);
-                echo "<tr>";
-                echo "<td>{$startTime} - {$endTime}</td>";
+        <table class="time-table">
+            <thead>
+                <tr>
+                    <th class="time-header">Time</th>
+                    <th>Monday</th>
+                    <th>Tuesday</th>
+                    <th>Wednesday</th>
+                    <th>Thursday</th>
+                    <th>Friday</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                // 生成 16 个时间段（9:00 到 17:00，每 30 分钟一格）
+                for ($slot = 1; $slot < 17; $slot++) {
+                    $startTime = date("H:i", strtotime("09:00") + ($slot - 1) * 30 * 60);
+                    $endTime = date("H:i", strtotime("09:00") + ($slot) * 30 * 60);
+                    echo "<tr>";
+                    echo "<td class='time-header'>{$startTime}<br>{$endTime}</td>";
 
-                // 循环 5 天（MO, TU, WE, TH, FR）
-                $days = ['MO', 'TU', 'WE', 'TH', 'FR'];
-                foreach ($days as $dayCode) {
-                    // 找出该时间段的课程
-                    $cellContent = '';
-                    foreach ($calendar['events'] as $event) {
-                        if ($event['extendedProps']['day'] === $dayCode) {
-                            // 转成时间槽编号
-                            $eventSlot = intval($event['extendedProps']['timeSlot']);
-                            $eventDuration = intval($event['extendedProps']['duration_slots']);
-                            if ($slot >= $eventSlot && $slot < $eventSlot + $eventDuration) {
-                                $cellContent = $event['extendedProps']['subjectName'] . "<br>"
-                                              . "<small>" . $event['extendedProps']['venueName'] . "</small><br>"
-                                              . "<small>" . $event['extendedProps']['lecturerName'] . "</small>";
-                                break;
+                    // 循环 5 天（MO, TU, WE, TH, FR）
+                    $days = ['MO', 'TU', 'WE', 'TH', 'FR'];
+                    foreach ($days as $dayCode) {
+                        // 找出该时间段的课程
+                        $cellContent = '';
+                        $typeClass = 'free';
+                        $details = '';
+                        
+                        foreach ($calendar['events'] as $event) {
+                            if ($event['extendedProps']['day'] === $dayCode) {
+                                // 转成时间槽编号
+                                $eventSlot = intval($event['extendedProps']['timeSlot']);
+                                $eventDuration = intval($event['extendedProps']['duration_slots']);
+                                if ($slot >= $eventSlot && $slot < $eventSlot + $eventDuration) {
+                                    $subjectName = $event['extendedProps']['subjectName'];
+                                    $venueName = $event['extendedProps']['venueName'];
+                                    $lecturerName = $event['extendedProps']['lecturerName'];
+                                    $typeClass = strtolower($event['extendedProps']['format_type'] ?? 'lecture');
+                                    
+                                    $cellContent = "<div class='cell-title'>{$subjectName}</div>";
+                                    $cellContent .= "<div class='cell-details'>{$venueName}</div>";
+                                    $cellContent .= "<div class='cell-details'>{$lecturerName}</div>";
+                                    
+                                    $details = "data-subject='{$subjectName}' data-venue='{$venueName}' data-lecturer='{$lecturerName}'";
+                                    break;
+                                }
                             }
                         }
+                        
+                        echo "<td class='time-cell {$typeClass}' {$details}>";
+                        echo "<div class='time-cell-content'>";
+                        echo $cellContent ?: '<div class="cell-details">Free Period</div>';
+                        echo "</div>";
+                        echo "</td>";
                     }
-                    echo "<td>" . ($cellContent ?: '') . "</td>";
+                    echo "</tr>";
                 }
-                echo "</tr>";
-            }
-            ?>
-          </tbody>
+                ?>
+            </tbody>
         </table>
       </div>
 
@@ -615,29 +719,6 @@ function getColorForSubject($subjectId) {
   </div>
 
   <div class="right">
-    <!-- <div class="card">
-      <div class="card-title">
-        <i class="fas fa-plus-circle"></i> 添加新课程
-      </div>
-      <div class="external-events" id="externalEvents">
-        <?php 
-        // 为每个科目创建可拖动事件
-        $uniqueSubjects = [];
-        foreach($subjects as $id => $name) {
-          if(!in_array($id, $uniqueSubjects)) {
-            $uniqueSubjects[] = $id;
-            $color = getColorForSubject($id);
-            echo '<div class="external-event" data-subject-id="'.$id.'" data-subject-name="'.$name.'" style="border-left-color: '.$color.';">';
-            echo '<div class="event-subject">'.$name.'</div>';
-            echo '<div class="event-details">';
-            echo '<div class="event-detail"><i class="fas fa-clock"></i> 2 课时</div>';
-            echo '</div>';
-            echo '</div>';
-          }
-        }
-        ?>
-      </div>
-    </div> -->
     
     <div class="card">
       <div class="card-title">
