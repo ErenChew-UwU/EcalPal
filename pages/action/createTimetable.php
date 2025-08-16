@@ -57,6 +57,7 @@ $result = $conn->query($sql);
             --primary-color: #4361ee;
             --primary-light: #eef2ff;
             --secondary-color: #3f37c9;
+            --accent-color: #7d51ff;
             --success-color: #38b000;
             --warning-color: #ff9e00;
             --danger-color: #e5383b;
@@ -596,7 +597,7 @@ $result = $conn->query($sql);
         // 提交表单
         function submitForm() {
             if (selectedBatches.length === 0) {
-                alert('请至少选择一个批次来生成时间表');
+                alert('Please select at least one batch to generate a timetable');
                 return false;
             }
             

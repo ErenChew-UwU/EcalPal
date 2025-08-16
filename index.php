@@ -1,5 +1,17 @@
 <?php
 include_once("./dbconnect.php");
+
+// 获取最后修改的时间表及对应的 batch 名称
+$sql = "
+    SELECT timetable.ID AS timetable_id, timetable.batch_id, timetable.lastModifyTime, batch.course_name 
+    FROM timetable 
+    JOIN batch ON timetable.batch_id = batch.ID 
+    ORDER BY timetable.lastModifyTime DESC 
+    LIMIT 1
+";
+
+$result = $conn->query($sql);
+$timetable = $result->fetch_assoc();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -18,6 +30,7 @@ include_once("./dbconnect.php");
             --primary-color: #4361ee;
             --primary-light: #eef2ff;
             --secondary-color: #3f37c9;
+            --accent-color: #7d51ff;
             --success-color: #38b000;
             --warning-color: #ff9e00;
             --danger-color: #e5383b;
@@ -182,7 +195,7 @@ include_once("./dbconnect.php");
             color: var(--text-dark);
         }
         
-        .db-item:hover {
+        .db-item:hover:not(.future) {
             background: #edf2f7;
             transform: translateY(-3px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -260,7 +273,7 @@ include_once("./dbconnect.php");
         }
 
         
-        .function-card:hover {
+        .function-card:hover:not(.future) {
             transform: translateY(-5px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
         }
@@ -369,19 +382,19 @@ include_once("./dbconnect.php");
                         <h3>Last Modified Timetable</h3>
                         <div class="timetable-meta">
                             <div class="meta-item">
-                                <div class="meta-label">Timetable Name</div>
-                                <!-- <div class="meta-value">Fall Semester 2023</div> -->
+                                <div class="meta-label">Batch Name of Timetable</div>
+                                <div class="meta-value"><?php echo htmlspecialchars($timetable['course_name']); ?></div>
                             </div>
                             <div class="meta-item">
                                 <div class="meta-label">Last Modified</div>
-                                <!-- <div class="meta-value">Oct 15, 2023 14:30</div> -->
+                                <div class="meta-value"><?php echo date("M d, Y H:i", strtotime($timetable['lastModifyTime'])); ?></div>
                             </div>
                         </div>
                         <div class="timetable-actions">
-                            <a href="./pages/viewTimetable.php?timetable=T001" class="btn btn-view">
+                            <a href="./pages/action/viewTimetable.php?timetable=<?php echo $timetable['timetable_id']; ?>" class="btn btn-view">
                                 <i class="fas fa-eye"></i> View
                             </a>
-                            <a href="./pages/editTimetable.php?timetable=T001" class="btn btn-edit">
+                            <a href="./pages/action/editTimetable.php?timetable=<?php echo $timetable['timetable_id']; ?>" class="btn btn-edit">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
                         </div>

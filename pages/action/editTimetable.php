@@ -107,14 +107,18 @@ if (isset($_GET['from']) && $_GET['from'] === 'generate') {
             }
         }
     }
-} elseif (!empty($_GET['timetable_id'])) {
+} elseif (!empty($_GET['timetable'])) {
     $sourceInfo = 'Timetable loaded from database';
     // 从数据库读取已有时间表
     $mode = 'db';
-    $timetable_id = $conn->real_escape_string($_GET['timetable_id']);
+    $timetable_id = $conn->real_escape_string($_GET['timetable']);
     $sql = "SELECT * FROM timetableslot WHERE timetable_id = '$timetable_id'";
     $res = $conn->query($sql);
     $events = [];
+    $timetable_info_sql = "SELECT batch_id FROM timetable WHERE ID = '$timetable_id'";
+    $timetable_info_res = $conn->query($timetable_info_sql);
+    $timetable_info = $timetable_info_res->fetch_assoc();
+    $batch_id = $timetable_info['batch_id'] ?? null;
     while ($g = $res->fetch_assoc()) {
         $start = timeslot_to_time($g['timeSlot']);
         $end_slot = intval($g['timeSlot']) + intval($g['duration']);
@@ -159,7 +163,7 @@ if (isset($_GET['from']) && $_GET['from'] === 'generate') {
     }
     $calendars[] = [
         'id' => $timetable_id,
-        'title' => "时间表 #{$timetable_id}",
+        'title' => $batches[$batch_id],
         'events' => $events,
         'timetable_id' => $timetable_id
     ];
@@ -182,64 +186,29 @@ function getColorForSubject($subjectId) {
 <html>
 <head>
   <meta charset="utf-8"/>
-  <title>编辑时间表</title>
+  <title>Ecalpal | Edit Timetable</title>
+  <link rel="shortcut icon" href="../../src/ico/ico_logo_001.png">
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales-all.min.js"></script>
+  <link rel="stylesheet" href="../../stylesheets/style_header.css">
+  <link rel="stylesheet" href="../../stylesheets/style_all.css">
   <style>
     :root {
-      --primary-color: #4361ee;
-      --primary-light: #eef2ff;
-      --secondary-color: #3f37c9;
-      --text-dark: #2d3748;
-      --text-light: #718096;
-      --light-bg: #f8fafc;
-      --border-color: #e2e8f0;
-      --card-shadow: 0 6px 16px rgba(0,0,0,0.08);
-      --card-radius: 12px;
-    }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    body {
-      background: #f0f4f8;
-      color: var(--text-dark);
-      line-height: 1.6;
-      min-height: 100vh;
-    }
-    
-    .header {
-      padding: 16px 24px;
-      background: #fff;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .logo-icon {
-      width: 40px;
-      height: 40px;
-      background: var(--primary-light);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--primary-color);
-      font-size: 20px;
+        --primary-color: #4361ee;
+        --primary-light: #eef2ff;
+        --secondary-color: #3f37c9;
+        --accent-color: #7d51ff;
+        --success-color: #38b000;
+        --warning-color: #ff9e00;
+        --danger-color: #e5383b;
+        --text-dark: #2d3748;
+        --text-light: #718096;
+        --light-bg: #f8fafc;
+        --border-color: #e2e8f0;
+        --card-shadow: 0 10px 20px rgba(0,0,0,0.05), 0 6px 6px rgba(0,0,0,0.04);
+        --hover-shadow: 0 15px 30px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.07);
     }
     
     .source-info {
@@ -542,7 +511,8 @@ function getColorForSubject($subjectId) {
   </style>
 </head>
 <body>
-<div class="header">
+  <?php include("../page_all/header_page_action.php"); ?>
+<!-- <div class="header">
   <div class="logo">
     <div class="logo-icon">
       <i class="fas fa-calendar-alt"></i>
@@ -559,7 +529,7 @@ function getColorForSubject($subjectId) {
       <i class="fas fa-arrow-left"></i> Back to Dashborad
     </button>
   </div>
-</div>
+</div> -->
 
 <div class="page-wrap">
   <div class="left" id="leftCalendars">
@@ -584,7 +554,7 @@ function getColorForSubject($subjectId) {
                 if (!empty($calendar['batchId'])) {
                   echo $calendar['batchId'];
                 } elseif (!empty($calendar['timetable_id'])) {
-                  echo "Timetable ID: " . $calendar['timetable_id'];
+                  echo $calendar['timetable_id'];
                 }
               ?>
             </span>

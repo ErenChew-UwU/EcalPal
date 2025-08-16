@@ -17,6 +17,7 @@ include_once("../dbconnect.php");
             --primary-color: #4361ee;
             --primary-light: #eef2ff;
             --secondary-color: #3f37c9;
+            --accent-color: #7d51ff;
             --success-color: #38b000;
             --warning-color: #ff9e00;
             --danger-color: #e5383b;
@@ -162,35 +163,106 @@ include_once("../dbconnect.php");
         .actions {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
-        
+
         .action-btn {
-            padding: 8px 12px;
-            border-radius: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
             border: none;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1;
         }
-        
+
+        .action-btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-100%);
+            transition: transform 0.4s ease;
+            z-index: -1;
+        }
+
+        .action-btn:hover:before {
+            transform: translateX(0);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+
+        .action-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .action-btn i {
+            transition: all 0.3s ease;
+        }
+
+        .view-btn {
+            background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
+            color: white;
+            border: 1px solid rgba(67, 97, 238, 0.3);
+        }
+
+        .view-btn:hover {
+            background: linear-gradient(135deg, #3b5fdb 0%, #3730a8 100%);
+        }
+
+        .view-btn:hover i {
+            transform: scale(1.15) rotate(5deg);
+        }
+
         .edit-btn {
-            background: rgba(236, 201, 75, 0.15);
-            color: var(--warning-color);
+            background: linear-gradient(135deg, #ffb300 0%, #ff9e00 100%);
+            color: #fff;
+            border: 1px solid rgba(236, 201, 75, 0.3);
         }
-        
+
         .edit-btn:hover {
-            background: rgba(236, 201, 75, 0.25);
+            background: linear-gradient(135deg, #e6a100 0%, #e58f00 100%);
         }
-        
+
+        .edit-btn:hover i {
+            transform: rotate(15deg) scale(1.15);
+        }
+
         .delete-btn {
-            background: rgba(229, 62, 62, 0.15);
-            color: var(--danger-color);
+            background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+            color: white;
+            border: 1px solid rgba(229, 62, 62, 0.3);
         }
-        
+
         .delete-btn:hover {
-            background: rgba(229, 62, 62, 0.25);
+            background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+        }
+
+        .delete-btn:hover i {
+            transform: scale(1.15);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) rotate(0); }
+            20% { transform: translateX(-3px) rotate(-5deg); }
+            40% { transform: translateX(3px) rotate(5deg); }
+            60% { transform: translateX(-3px) rotate(-5deg); }
+            80% { transform: translateX(3px) rotate(5deg); }
         }
         
         /* Stats Section */

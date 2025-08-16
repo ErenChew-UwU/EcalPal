@@ -6,11 +6,11 @@
             </div>
         </a>
         <div class="nav-links">
-            <a href="../../index.php" class="nav-link active">
+            <a href="../../index.php" class="nav-link">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
-            <a href="../../pages/dashboardTimetable.php" class="nav-link">
+            <a href="../../pages/dashboardTimetable.php" class="nav-link active">
                 <i class="fas fa-calendar-alt"></i>
                 <span>Timetable</span>
             </a>
