@@ -18,11 +18,11 @@
                 <i class="fas fa-database"></i>
                 <span>Database</span>
                 <div class="dropdown-content">
-                    <a href="./dashboardBatch.php"><i class="fas fa-users"></i> Batch</a>
+                    <a href="./dashboardBatch.php" class="future"><i class="fas fa-users"></i> Batch</a>
                     <a href="./dashboardLecturer.php"><i class="fas fa-chalkboard-teacher"></i> Lecturer</a>
-                    <a href="./dashboardStudent.php"><i class="fas fa-user-graduate"></i> Student</a>
-                    <a href="./dashboardSubject.php"><i class="fas fa-book"></i> Subject</a>
-                    <a href="./dashboardVenue.php"><i class="fas fa-building"></i> Venue</a>
+                    <a href="./dashboardStudent.php" class="future"><i class="fas fa-user-graduate"></i> Student</a>
+                    <a href="./dashboardSubject.php" class="future"><i class="fas fa-book"></i> Subject</a>
+                    <a href="./dashboardVenue.php" class="future"><i class="fas fa-building"></i> Venue</a>
                 </div>
             </div>
         </div>

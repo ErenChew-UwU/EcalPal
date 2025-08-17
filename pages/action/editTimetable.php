@@ -670,7 +670,7 @@ function getColorForSubject($subjectId) {
                     $startTime = date("H:i", strtotime("09:00") + ($slot - 1) * 30 * 60);
                     $endTime = date("H:i", strtotime("09:00") + ($slot) * 30 * 60);
                     echo "<tr>";
-                    echo "<td class='time-header'>{$startTime}<br>{$endTime}</td>";
+                    echo "<td class='time-header'>{$startTime}<br> ~ <br>{$endTime}</td>";
 
                     // 循环 5 天（MO, TU, WE, TH, FR）
                     $days = ['MO', 'TU', 'WE', 'TH', 'FR'];

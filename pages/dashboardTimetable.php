@@ -218,14 +218,28 @@ include_once("../dbconnect.php");
             transition: all 0.3s ease;
         }
 
-        .view-btn {
+        .preview-btn {
             background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
             color: white;
             border: 1px solid rgba(67, 97, 238, 0.3);
         }
 
-        .view-btn:hover {
+        .preview-btn:hover {
             background: linear-gradient(135deg, #3b5fdb 0%, #3730a8 100%);
+        }
+
+        .preview-btn:hover i {
+            transform: scale(1.15) rotate(5deg);
+        }
+
+        .view-btn {
+            background: linear-gradient(135deg, #43ee73 0%, #37c957 100%);
+            color: white;
+            border: 1px solid rgba(67, 238, 121, 0.3);
+        }
+
+        .view-btn:hover {
+            background: linear-gradient(135deg, #3bdb66 0%, #30a844 100%);
         }
 
         .view-btn:hover i {
@@ -747,10 +761,15 @@ include_once("../dbconnect.php");
                                 echo "<td>{$row['slot_count']}</td>";
                                 echo "<td class='actions'>";
                                 
-                                // View 按钮
-                                echo "<button class='action-btn view-btn' onclick=\"showTable('{$row['timetable_id']}')\">";
+                                // Preview 按钮
+                                echo "<button class='action-btn preview-btn' onclick=\"showTable('{$row['timetable_id']}')\">";
                                 echo "<i class='fas fa-calendar-alt'></i> Preview";
                                 echo "</button>";
+
+                                // View 按钮
+                                echo "<a href='./action/viewTimetable.php?timetable={$row['timetable_id']}' class='action-btn view-btn'>";
+                                echo "<i class='fas fa-calendar-alt'></i> View";
+                                echo "</a> ";
                                 
                                 // Edit 按钮
                                 echo "<a href='./action/editTimetable.php?timetable={$row['timetable_id']}' class='action-btn edit-btn'>";

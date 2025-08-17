@@ -228,6 +228,20 @@ include_once("../dbconnect.php");
             transform: scale(1.15) rotate(5deg);
         }
 
+        .subject-btn {
+            background: linear-gradient(135deg, #43ee73 0%, #37c957 100%);
+            color: white;
+            border: 1px solid rgba(67, 238, 121, 0.3);
+        }
+
+        .subject-btn:hover {
+            background: linear-gradient(135deg, #3bdb66 0%, #30a844 100%);
+        }
+
+        .subject-btn:hover i {
+            transform: scale(1.15) rotate(5deg);
+        }
+
         .edit-btn {
             background: linear-gradient(135deg, #ffb300 0%, #ff9e00 100%);
             color: #fff;
@@ -418,6 +432,43 @@ include_once("../dbconnect.php");
             color: #333;
         }
 
+        .subject-card , .no-subjects {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transition: all 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .subject-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        
+        .subject-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #3498db, #9b59b6);
+        }
+
+        .subject-display , .no-subjects {
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
         
         /* Responsive Design */
         @media (max-width: 768px) {
@@ -578,6 +629,10 @@ include_once("../dbconnect.php");
                                 echo "<button class='action-btn view-btn' onclick=\"showAvailability('lecturer','{$row['ID']}','{$row['name']}')\">";
                                 echo "<i class='fas fa-calendar-alt'></i> View";
                                 echo "</button>";
+
+                                echo "<button class='action-btn subject-btn' onclick=\"showSubjects('{$row['ID']}', '{$row['name']}')\">";
+                                echo "<i class='fas fa-book'></i> Subjects";
+                                echo "</button>";
                                 
                                 echo "<button class='action-btn edit-btn'>";
                                 echo "<i class='fas fa-edit'></i> Edit";
@@ -732,6 +787,89 @@ include_once("../dbconnect.php");
         function closeModal() {
             document.getElementById('availability-modal').style.display = 'none';
         }
+
+        window.addEventListener('click', function(event) {
+            const subjectsModal = document.getElementById('availability-modal');
+            if (event.target === subjectsModal) {
+                closeModal();
+            }
+        });
+
+        // 获取科目数据的函数
+        function fetchSubjects(lecturerId) {
+            return fetch(`get_lecturer_subjects.php?lecturer_id=${lecturerId}`)
+                .then(response => response.json())
+                .catch(error => {
+                    console.error('Error fetching subjects:', error);
+                    return { error: 'Failed to fetch subjects data' };
+                });
+        }
+
+        // 显示科目模态框
+        async function showSubjects(lecturerId, lecturerName) {
+            const modal = document.getElementById('subjects-modal');
+            const title = document.getElementById('subjects-title');
+            const content = document.getElementById('subjects-content');
+            
+            // 设置标题
+            title.textContent = `${lecturerName}'s Subjects`;
+            
+            // 显示加载状态
+            content.innerHTML = '<div class="loading">Loading subjects data...</div>';
+            modal.style.display = 'flex';
+            
+            try {
+                // 获取科目数据
+                const response = await fetchSubjects(lecturerId);
+                
+                if (response.error) {
+                    content.innerHTML = `<div class="error">${response.error}</div>`;
+                    return;
+                }
+                
+                // 填充科目列表
+                populateSubjectsList(response.subjects);
+            } catch (error) {
+                console.error('Error:', error);
+                content.innerHTML = '<div class="error">Error loading subjects data</div>';
+            }
+        }
+        
+        // 填充科目列表
+        function populateSubjectsList(subjects) {
+            const content = document.getElementById('subjects-content');
+            
+            if (subjects.length === 0) {
+                content.innerHTML = '<div class="no-subjects">This lecturer has no assigned subjects.</div>';
+                return;
+            }
+            
+            let html = '<div class="subject-list">';
+            
+            subjects.forEach(subject => {
+                html += `
+                <div class="subject-card">
+                    <div class="subject-display">${subject.display}</div>
+                </div>
+                `;
+            });
+            
+            html += '</div>';
+            content.innerHTML = html;
+        }
+        
+        // 关闭科目模态框
+        function closeSubjectsModal() {
+            document.getElementById('subjects-modal').style.display = 'none';
+        }
+        
+        // 关闭所有模态框（点击模态框外部）
+        window.addEventListener('click', function(event) {
+            const subjectsModal = document.getElementById('subjects-modal');
+            if (event.target === subjectsModal) {
+                closeSubjectsModal();
+            }
+        });
     </script>
 
     <!-- 可用时间模态框 -->
@@ -742,6 +880,20 @@ include_once("../dbconnect.php");
                 <span class="close" onclick="closeModal()">&times;</span>
             </div>
             <div id="time-grid" class="time-grid"></div>
+        </div>
+    </div>
+    <div id="subjects-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-book"></i>
+                    <span id="subjects-title">Lecturer Subjects</span>
+                </div>
+                <span class="close" onclick="closeSubjectsModal()">&times;</span>
+            </div>
+            <div id="subjects-content">
+                <div class="loading">Loading subjects...</div>
+            </div>
         </div>
     </div>
 </body>
