@@ -777,7 +777,7 @@ include_once("../dbconnect.php");
                                 echo "</a> ";
 
                                 // Delete 按钮（可选加入 confirm）
-                                echo "<button class='action-btn delete-btn' onclick='confirmDeleteTimetable(\"{$row['timetable_id']}\")'>";
+                                echo "<button class='action-btn delete-btn' onclick='confirmDelete(\"{$row['timetable_id']}\")'>";
                                 echo "<i class='fas fa-trash'></i> Delete";
                                 echo "</button>";
 
@@ -807,9 +807,9 @@ include_once("../dbconnect.php");
     <script>     
         // 确认删除函数
         function confirmDelete(id, name) {
-            if (confirm(`Are you sure you want to delete lecturer "${name}" (ID: ${id})? This action cannot be undone.`)) {
+            if (confirm(`Some features are still under development and will be available in future updates.`)) {
                 // 在实际应用中，这里应该发送AJAX请求或重定向到删除脚本
-                alert(`Lecturer ${name} (${id}) would be deleted in a real application.`);
+                // alert(`Lecturer ${name} (${id}) would be deleted in a real application.`);
                 // window.location.href = `delete_lecturer.php?id=${id}`;
             }
         }

@@ -102,7 +102,7 @@ if (isset($_GET['from']) && $_GET['from'] === 'generate') {
                     'id' => $batchId,
                     'title' => $batches[$batchId],
                     'events' => $events,
-                    'batchId' => $batchId
+                    'batch_id' => $batchId
                 ];
             }
         }
@@ -162,7 +162,7 @@ if (isset($_GET['from']) && $_GET['from'] === 'generate') {
         ];
     }
     $calendars[] = [
-        'id' => $timetable_id,
+        'batch_id' => $batch_id,
         'title' => $batches[$batch_id],
         'events' => $events,
         'timetable_id' => $timetable_id
@@ -691,7 +691,7 @@ function getColorForSubject($subjectId) {
             <?php else: ?>
                 <?php foreach ($calendars as $idx => $calendar): ?>
                     <div class="calendar-card" 
-                        data-batch-id="<?= $calendar['batchId'] ?? '' ?>" 
+                        data-batch-id="<?= $calendar['batch_id'] ?? '' ?>" 
                         data-timetable-id="<?= $calendar['timetable_id'] ?? '' ?>">
 
                         <div class="calendar-title">
@@ -699,8 +699,8 @@ function getColorForSubject($subjectId) {
                             <div class="batch-info">
                                 <span class="batch-id">
                                     <?php 
-                                        if (!empty($calendar['batchId'])) {
-                                            echo $calendar['batchId'];
+                                        if (!empty($calendar['batch_id'])) {
+                                            echo $calendar['batch_id'];
                                         } elseif (!empty($calendar['timetable_id'])) {
                                             echo $calendar['timetable_id'];
                                         }
@@ -1114,6 +1114,9 @@ function getColorForSubject($subjectId) {
                     });
                 });
 
+                console.log("即将发送的数据 allChanges：", JSON.stringify(allChanges, null, 2));
+
+
                 
                 // 发送到服务器
                 fetch('saveTimetable.php', {
@@ -1123,16 +1126,15 @@ function getColorForSubject($subjectId) {
                     },
                     body: JSON.stringify({
                         changes: allChanges,
-                        source: '<?php echo $mode; ?>' // 标识来源（generated 或 db）
+                        source: '<?php echo $mode; ?>'  // 'generated' 或 'db'
                     })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // 保存成功
+                        alert('Timetable saved successfully!');
                         unsavedCount = 0;
                         updateUnsavedCount(0);
-                        alert('Timetable saved successfully!');
                     } else {
                         alert('Error: ' + data.message);
                     }
@@ -1145,6 +1147,7 @@ function getColorForSubject($subjectId) {
                     saveBtn.innerHTML = originalHTML;
                     saveBtn.disabled = false;
                 });
+
             });
             
             // 重置按钮事件
