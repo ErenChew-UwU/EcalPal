@@ -690,13 +690,10 @@ function getColorForSubject($subjectId) {
                 </div>
             <?php else: ?>
                 <?php foreach ($calendars as $idx => $calendar): ?>
-                    <div class="calendar-card" data-batch-id="<?php 
-                          if (!empty($calendar['batchId'])) {
-                              echo $calendar['batchId'];
-                          } elseif (!empty($calendar['timetable_id'])) {
-                              echo $calendar['timetable_id'];
-                          }
-                      ?>">
+                    <div class="calendar-card" 
+                        data-batch-id="<?= $calendar['batchId'] ?? '' ?>" 
+                        data-timetable-id="<?= $calendar['timetable_id'] ?? '' ?>">
+
                         <div class="calendar-title">
                             <div><?php echo $calendar['title']; ?></div>
                             <div class="batch-info">
@@ -751,8 +748,11 @@ function getColorForSubject($subjectId) {
                                                     $eventSlot = intval($event['extendedProps']['timeSlot']);
                                                     $eventDuration = intval($event['extendedProps']['duration_slots']);
                                                     if ($slot >= $eventSlot && $slot < $eventSlot + $eventDuration) {
+                                                        $subjectId = $event['extendedProps']['subjectId'];
                                                         $subjectName = $event['extendedProps']['subjectName'];
+                                                        $venueId = $event['extendedProps']['venueId'];
                                                         $venueName = $event['extendedProps']['venueName'];
+                                                        $lecturerId = $event['extendedProps']['lecturerId'];
                                                         $lecturerName = $event['extendedProps']['lecturerName'];
                                                         $eventId = $event['id'];
                                                         
@@ -766,7 +766,7 @@ function getColorForSubject($subjectId) {
                                                             $isStartCell = true;
                                                         }
                                                         
-                                                        $details = "data-subject='{$subjectName}' data-venue='{$venueName}' data-lecturer='{$lecturerName}' data-eventid='{$eventId}' data-day='{$dayCode}' data-start-slot='{$eventSlot}' data-duration='{$eventDuration}'";
+                                                        $details = "data-subject-id='{$subjectId}' data-subject='{$subjectName}' data-venue-id='{$venueId}' data-venue='{$venueName}' data-lecturer-id='{$lecturerId}'  data-lecturer='{$lecturerName}' data-eventid='{$eventId}' data-start-slot='{$eventSlot}' data-duration='{$eventDuration}'";
                                                         $typeClass = 'lecture';
                                                         break;
                                                     }
@@ -833,221 +833,40 @@ function getColorForSubject($subjectId) {
     </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-        let unsavedCount = 0;
-        const unsavedElements = [
-            document.getElementById('unsavedCount'),
-            document.getElementById('unsavedCountRight')
-        ];
-        
-        // 更新未保存计数
-        function updateUnsavedCount(delta = 1) {
-            unsavedCount = Math.max(0, unsavedCount + delta);
-            unsavedElements.forEach(el => {
-                if (el) el.textContent = unsavedCount;
-            });
-        }
-        
-        // 拖拽功能实现
-        let draggedEvent = null;
-        
-        // 设置可拖动单元格
-        document.querySelectorAll('.time-cell.draggable').forEach(cell => {
-            cell.setAttribute('draggable', true);
+    document.addEventListener('DOMContentLoaded', function() {
+            let unsavedCount = 0;
+            const unsavedElements = [
+                document.getElementById('unsavedCount'),
+                document.getElementById('unsavedCountRight')
+            ];
             
-            cell.addEventListener('dragstart', function(e) {
-                const calendarCard = this.closest('.calendar-card');
-                const batchId = calendarCard.dataset.batchId;
-                
-                draggedEvent = {
-                    id: this.dataset.eventid,
-                    subject: this.dataset.subject,
-                    venue: this.dataset.venue,
-                    lecturer: this.dataset.lecturer,
-                    day: this.dataset.day,
-                    startSlot: parseInt(this.dataset.startSlot),
-                    duration: parseInt(this.dataset.duration),
-                    originalCell: this,
-                    batchId: batchId
-                };
-                
-                e.dataTransfer.setData('text/plain', 'dragging');
-                this.style.opacity = '0.4';
-            });
-            
-            cell.addEventListener('dragend', function() {
-                this.style.opacity = '1';
-                document.querySelectorAll('.time-cell').forEach(c => {
-                    c.classList.remove('dragging-over');
+            // 更新未保存计数
+            function updateUnsavedCount(delta = 1) {
+                unsavedCount = Math.max(0, unsavedCount + delta);
+                unsavedElements.forEach(el => {
+                    if (el) el.textContent = unsavedCount;
                 });
-            });
-        });
-        
-        // 设置可放置目标
-        document.querySelectorAll('.time-cell').forEach(cell => {
-            cell.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                this.classList.add('dragging-over');
-            });
-            
-            cell.addEventListener('dragleave', function() {
-                this.classList.remove('dragging-over');
-            });
-            
-            cell.addEventListener('drop', function(e) {
-                e.preventDefault();
-                this.classList.remove('dragging-over');
-                
-                if (!draggedEvent) return;
-                
-                // 获取目标单元格所属的批次ID
-                const targetCalendarCard = this.closest('.calendar-card');
-                const targetBatchId = targetCalendarCard.dataset.batchId;
-                
-                // 检查是否在同一批次内
-                if (draggedEvent.batchId !== targetBatchId) {
-                    alert("Cannot move to another batch!");
-                    draggedEvent = null;
-                    return;
-                }
-                
-                const targetDay = this.dataset.day;
-                const targetSlot = parseInt(this.dataset.slot);
-                
-                // 检查目标位置是否有效
-                if (!targetDay || isNaN(targetSlot)) return;
-                
-                // 直接移动事件到新位置（不再检查冲突）
-                moveEvent(draggedEvent, targetDay, targetSlot);
-                updateUnsavedCount();
-                
-                // 清除拖拽状态
-                draggedEvent = null;
-            });
-        });
-
-        // 根据日期和时间槽获取单元格
-        function getCellByDayAndSlot(batchId, day, slot) {
-            const dayMap = { 'MO': 1, 'TU': 2, 'WE': 3, 'TH': 4, 'FR': 5 };
-            const colIndex = dayMap[day];
-            if (!colIndex) return null;
-            
-            // 只在当前批次内查找
-            const calendarCard = document.querySelector(`.calendar-card[data-batch-id="${batchId}"]`);
-            if (!calendarCard) return null;
-            
-            const row = calendarCard.querySelector(`tr[data-slot="${slot}"]`);
-            if (!row) return null;
-            
-            return row.cells[colIndex];
-        }
-        
-        // 移动事件函数
-        function moveEvent(eventData, newDay, newSlot) {
-            // 1. 清除原始位置的事件
-            clearEvent(eventData.id, eventData.batchId);
-            
-            // 2. 在新位置创建事件
-            createEvent({
-                id: eventData.id,
-                subject: eventData.subject,
-                venue: eventData.venue,
-                lecturer: eventData.lecturer,
-                day: newDay,
-                startSlot: newSlot,
-                duration: eventData.duration,
-                batchId: eventData.batchId
-            });
-        }
-        
-        // 清除事件函数
-        function clearEvent(eventId, batchId) {
-            const calendarCard = document.querySelector(`.calendar-card[data-batch-id="${batchId}"]`);
-            if (!calendarCard) return;
-
-            calendarCard.querySelectorAll(`[data-eventid="${eventId}"]`).forEach(cell => {
-                cell.classList.remove('lecture');
-                cell.classList.add('free');
-                cell.classList.remove('draggable');
-                cell.removeAttribute('draggable');
-                cell.removeAttribute('data-subject');
-                cell.removeAttribute('data-venue');
-                cell.removeAttribute('data-lecturer');
-                cell.removeAttribute('data-eventid');
-                cell.removeAttribute('data-start-slot');
-                cell.removeAttribute('data-duration');
-                
-                cell.innerHTML = '<div class="time-cell-content"><div class="cell-details">Free Period</div></div>';
-            });
-        }
-        
-        // 创建事件函数
-        function createEvent(eventData) {
-            const calendarCard = document.querySelector(`.calendar-card[data-batch-id="${eventData.batchId}"]`);
-            if (!calendarCard) return;
-            
-            const days = ['MO', 'TU', 'WE', 'TH', 'FR'];
-            const dayIndex = days.indexOf(eventData.day) + 1;
-            
-            for (let i = 0; i < eventData.duration; i++) {
-                const slot = eventData.startSlot + i;
-                const row = calendarCard.querySelector(`tr[data-slot="${slot}"]`);
-                
-                if (!row) continue;
-                
-                const targetCell = row.cells[dayIndex];
-                
-                if (!targetCell) continue;
-                
-                // 设置单元格内容
-                targetCell.classList.remove('free');
-                targetCell.classList.add('lecture');
-                
-                // 仅第一个单元格设置为可拖动
-                if (i === 0) {
-                    targetCell.classList.add('draggable');
-                    targetCell.setAttribute('draggable', 'true');
-                    targetCell.innerHTML = `
-                        <div class="time-cell-content">
-                            <div class="cell-title">${eventData.subject}</div>
-                            <div class="cell-details">${eventData.venue}</div>
-                            <div class="cell-details">${eventData.lecturer}</div>
-                            <div class="drag-handle"><i class="fas fa-grip-lines"></i></div>
-                        </div>
-                    `;
-                } else {
-                    targetCell.innerHTML = `
-                        <div class="time-cell-content">
-                            <div class="cell-title">${eventData.subject}</div>
-                            <div class="cell-details">${eventData.venue}</div>
-                            <div class="cell-details">${eventData.lecturer}</div>
-                        </div>
-                    `;
-                }
-                
-                // 设置数据属性
-                targetCell.dataset.subject = eventData.subject;
-                targetCell.dataset.venue = eventData.venue;
-                targetCell.dataset.lecturer = eventData.lecturer;
-                targetCell.dataset.eventid = eventData.id;
-                targetCell.dataset.day = eventData.day;
-                targetCell.dataset.startSlot = eventData.startSlot;
-                targetCell.dataset.duration = eventData.duration;
-                targetCell.dataset.slot = slot;
             }
             
-            // 重新添加事件监听器
-            const newDraggableCell = document.querySelector(`[data-eventid="${eventData.id}"].draggable`);
-            if (newDraggableCell) {
-                newDraggableCell.addEventListener('dragstart', function(e) {
+            // 拖拽功能实现
+            let draggedEvent = null;
+            
+            // 设置可拖动单元格
+            document.querySelectorAll('.time-cell.draggable').forEach(cell => {
+                cell.setAttribute('draggable', true);
+                
+                cell.addEventListener('dragstart', function(e) {
                     const calendarCard = this.closest('.calendar-card');
                     const batchId = calendarCard.dataset.batchId;
                     
                     draggedEvent = {
                         id: this.dataset.eventid,
                         subject: this.dataset.subject,
+                        subjectId: this.dataset.subjectId,
                         venue: this.dataset.venue,
+                        venueId: this.dataset.venueId,
                         lecturer: this.dataset.lecturer,
+                        lecturerId: this.dataset.lecturerId,
                         day: this.dataset.day,
                         startSlot: parseInt(this.dataset.startSlot),
                         duration: parseInt(this.dataset.duration),
@@ -1059,57 +878,286 @@ document.addEventListener('DOMContentLoaded', function() {
                     this.style.opacity = '0.4';
                 });
                 
-                newDraggableCell.addEventListener('dragend', function() {
+                cell.addEventListener('dragend', function() {
                     this.style.opacity = '1';
                     document.querySelectorAll('.time-cell').forEach(c => {
                         c.classList.remove('dragging-over');
                     });
                 });
+            });
+            
+            // 设置可放置目标
+            document.querySelectorAll('.time-cell').forEach(cell => {
+                cell.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.classList.add('dragging-over');
+                });
+                
+                cell.addEventListener('dragleave', function() {
+                    this.classList.remove('dragging-over');
+                });
+                
+                cell.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('dragging-over');
+                    
+                    if (!draggedEvent) return;
+                    
+                    // 获取目标单元格所属的批次ID
+                    const targetCalendarCard = this.closest('.calendar-card');
+                    const targetBatchId = targetCalendarCard.dataset.batchId;
+                    
+                    // 检查是否在同一批次内
+                    if (draggedEvent.batchId !== targetBatchId) {
+                        alert("Cannot move to another batch!");
+                        draggedEvent = null;
+                        return;
+                    }
+                    
+                    const targetDay = this.dataset.day;
+                    const targetSlot = parseInt(this.dataset.slot);
+                    
+                    // 检查目标位置是否有效
+                    if (!targetDay || isNaN(targetSlot)) return;
+                    
+                    // 直接移动事件到新位置（不再检查冲突）
+                    moveEvent(draggedEvent, targetDay, targetSlot);
+                    updateUnsavedCount();
+                    
+                    // 清除拖拽状态
+                    draggedEvent = null;
+                });
+            });
+
+            // 根据日期和时间槽获取单元格
+            function getCellByDayAndSlot(batchId, day, slot) {
+                const dayMap = { 'MO': 1, 'TU': 2, 'WE': 3, 'TH': 4, 'FR': 5 };
+                const colIndex = dayMap[day];
+                if (!colIndex) return null;
+                
+                // 只在当前批次内查找
+                const calendarCard = document.querySelector(`.calendar-card[data-batch-id="${batchId}"]`);
+                if (!calendarCard) return null;
+                
+                const row = calendarCard.querySelector(`tr[data-slot="${slot}"]`);
+                if (!row) return null;
+                
+                return row.cells[colIndex];
             }
-        }
-        
-        // 保存按钮事件
-        document.getElementById('saveAll').addEventListener('click', function() {
             
-            // 显示保存状态
-            const saveBtn = this;
-            const originalHTML = saveBtn.innerHTML;
-            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-            saveBtn.disabled = true;
+            // 移动事件函数
+            function moveEvent(eventData, newDay, newSlot) {
+                // 1. 清除原始位置的事件
+                clearEvent(eventData.id, eventData.batchId);
+                
+                // 2. 在新位置创建事件
+                createEvent({
+                    id: eventData.id,
+                    subject: eventData.subject,
+                    subjectId: eventData.subjectId,
+                    venue: eventData.venue,
+                    venueId: eventData.venueId,
+                    lecturer: eventData.lecturer,
+                    lecturerId: eventData.lecturerId,
+                    day: newDay,
+                    startSlot: newSlot,
+                    duration: eventData.duration,
+                    batchId: eventData.batchId
+                });
+            }
             
-            // 模拟保存过程
-            setTimeout(() => {
-                saveBtn.innerHTML = originalHTML;
-                saveBtn.disabled = false;
+            // 清除事件函数
+            function clearEvent(eventId, batchId) {
+                const calendarCard = document.querySelector(`.calendar-card[data-batch-id="${batchId}"]`);
+                if (!calendarCard) return;
+
+                calendarCard.querySelectorAll(`[data-eventid="${eventId}"]`).forEach(cell => {
+                    cell.classList.remove('lecture');
+                    cell.classList.add('free');
+                    cell.classList.remove('draggable');
+                    cell.removeAttribute('draggable');
+                    cell.removeAttribute('data-subject-id');
+                    cell.removeAttribute('data-subject');
+                    cell.removeAttribute('data-venue-id');
+                    cell.removeAttribute('data-venue');
+                    cell.removeAttribute('data-lecturer-id');
+                    cell.removeAttribute('data-lecturer');
+                    cell.removeAttribute('data-eventid');
+                    cell.removeAttribute('data-start-slot');
+                    cell.removeAttribute('data-duration');
+                    
+                    cell.innerHTML = '<div class="time-cell-content"><div class="cell-details">Free Period</div></div>';
+                });
+            }
+            
+            // 创建事件函数
+            function createEvent(eventData) {
+                const calendarCard = document.querySelector(`.calendar-card[data-batch-id="${eventData.batchId}"]`);
+                if (!calendarCard) return;
                 
-                // 更新状态
-                unsavedCount = 0;
-                updateUnsavedCount(0);
+                const days = ['MO', 'TU', 'WE', 'TH', 'FR'];
+                const dayIndex = days.indexOf(eventData.day) + 1;
                 
-                // 显示成功消息
-                const statusIndicator = document.querySelector('.status-indicator');
-                statusIndicator.className = 'status-indicator status-saving';
-                statusIndicator.innerHTML = '<i class="fas fa-check-circle"></i> Changes saved successfully';
+                for (let i = 0; i < eventData.duration; i++) {
+                    const slot = eventData.startSlot + i;
+                    const row = calendarCard.querySelector(`tr[data-slot="${slot}"]`);
+                    
+                    if (!row) continue;
+                    
+                    const targetCell = row.cells[dayIndex];
+                    
+                    if (!targetCell) continue;
+                    
+                    // 设置单元格内容
+                    targetCell.classList.remove('free');
+                    targetCell.classList.add('lecture');
+                    
+                    // 仅第一个单元格设置为可拖动
+                    if (i === 0) {
+                        targetCell.classList.add('draggable');
+                        targetCell.setAttribute('draggable', 'true');
+                        targetCell.innerHTML = `
+                            <div class="time-cell-content">
+                                <div class="cell-title">${eventData.subject}</div>
+                                <div class="cell-details">${eventData.venue}</div>
+                                <div class="cell-details">${eventData.lecturer}</div>
+                                <div class="drag-handle"><i class="fas fa-grip-lines"></i></div>
+                            </div>
+                        `;
+                    } else {
+                        targetCell.innerHTML = `
+                            <div class="time-cell-content">
+                                <div class="cell-title">${eventData.subject}</div>
+                                <div class="cell-details">${eventData.venue}</div>
+                                <div class="cell-details">${eventData.lecturer}</div>
+                            </div>
+                        `;
+                    }
+                    
+                    // 设置数据属性
+                    targetCell.dataset.subjectId = eventData.subjectId;
+                    targetCell.dataset.venueId = eventData.venueId;
+                    targetCell.dataset.lecturerId = eventData.lecturerId;
+                    targetCell.dataset.subject = eventData.subject;
+                    targetCell.dataset.venue = eventData.venue;
+                    targetCell.dataset.lecturer = eventData.lecturer;
+                    targetCell.dataset.eventid = eventData.id;
+                    targetCell.dataset.day = eventData.day;
+                    targetCell.dataset.startSlot = eventData.startSlot;
+                    targetCell.dataset.duration = eventData.duration;
+                    targetCell.dataset.slot = slot;
+                }
                 
-                // 3秒后恢复状态
-                setTimeout(() => {
-                    statusIndicator.className = 'status-indicator status-unsaved';
-                    statusIndicator.innerHTML = '<i class="fas fa-exclamation-circle"></i> Unsaved changes: <span id="unsavedCount">0</span>';
-                }, 3000);
-            }, 1500);
-        });
-        
-        // 重置按钮事件
-        document.getElementById('resetBtn').addEventListener('click', function() {
-            if (unsavedCount > 0) {
-                if (confirm('You have unsaved changes. Are you sure you want to reset?')) {
+                // 重新添加事件监听器
+                const newDraggableCell = document.querySelector(`[data-eventid="${eventData.id}"].draggable`);
+                if (newDraggableCell) {
+                    newDraggableCell.addEventListener('dragstart', function(e) {
+                        const calendarCard = this.closest('.calendar-card');
+                        const batchId = calendarCard.dataset.batchId;
+                        
+                        draggedEvent = {
+                            id: this.dataset.eventid,
+                            subject: this.dataset.subject,
+                            subjectId: this.dataset.subjectId,
+                            venue: this.dataset.venue,
+                            venueId: this.dataset.venueId,
+                            lecturer: this.dataset.lecturer,
+                            lecturerId: this.dataset.lecturerId,
+                            day: this.dataset.day,
+                            startSlot: parseInt(this.dataset.startSlot),
+                            duration: parseInt(this.dataset.duration),
+                            originalCell: this,
+                            batchId: batchId
+                        };
+                        
+                        e.dataTransfer.setData('text/plain', 'dragging');
+                        this.style.opacity = '0.4';
+                    });
+                    
+                    newDraggableCell.addEventListener('dragend', function() {
+                        this.style.opacity = '1';
+                        document.querySelectorAll('.time-cell').forEach(c => {
+                            c.classList.remove('dragging-over');
+                        });
+                    });
+                }
+            }
+            
+            document.getElementById('saveAll').addEventListener('click', function() {
+                const saveBtn = this;
+                const originalHTML = saveBtn.innerHTML;
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                saveBtn.disabled = true;
+                
+                // 收集所有修改
+                const allChanges = [];
+                
+                // 遍历所有批次的时间表
+                document.querySelectorAll('.calendar-card').forEach(card => {
+                    const batchId = card.dataset.batchId;
+                    const timetableId = card.dataset.timetableId;
+
+                    card.querySelectorAll('.time-cell.lecture[data-eventid]').forEach(cell => {
+                        if (cell.classList.contains('draggable')) {
+                            allChanges.push({
+                                eventId: cell.dataset.eventid,
+                                batchId: batchId || null,       // generate 模式用 batchId
+                                timetableId: timetableId || null, // db 模式用 timetableId
+                                subjectId: cell.dataset.subjectId,
+                                venueId: cell.dataset.venueId,
+                                lecturerId: cell.dataset.lecturerId,
+                                day: cell.dataset.day,
+                                timeSlot: parseInt(cell.dataset.startSlot),
+                                duration: parseInt(cell.dataset.duration)
+                            });
+                        }
+                    });
+                });
+
+                
+                // 发送到服务器
+                fetch('saveTimetable.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        changes: allChanges,
+                        source: '<?php echo $mode; ?>' // 标识来源（generated 或 db）
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 保存成功
+                        unsavedCount = 0;
+                        updateUnsavedCount(0);
+                        alert('Timetable saved successfully!');
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while saving.');
+                })
+                .finally(() => {
+                    saveBtn.innerHTML = originalHTML;
+                    saveBtn.disabled = false;
+                });
+            });
+            
+            // 重置按钮事件
+            document.getElementById('resetBtn').addEventListener('click', function() {
+                if (unsavedCount > 0) {
+                    if (confirm('You have unsaved changes. Are you sure you want to reset?')) {
+                        location.reload();
+                    }
+                } else {
                     location.reload();
                 }
-            } else {
-                location.reload();
-            }
+            });
         });
-    });
 </script>
 </body>
 </html>

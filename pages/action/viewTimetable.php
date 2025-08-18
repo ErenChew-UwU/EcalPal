@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="../../stylesheets/style_header.css">
+    <link rel="stylesheet" href="../../stylesheets/style_all.css">
     <style>
         * {
             margin: 0;
@@ -19,7 +22,6 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
             color: #333;
             line-height: 1.6;
-            padding: 10px;
             min-height: 100vh;
         }
         
@@ -423,6 +425,8 @@
     </style>
 </head>
 <body>
+
+<?php include("../page_all/header_page_action.php"); ?>
     <div class="loading-overlay">
         <div class="spinner"></div>
         <p>Loading timetable data...</p>
@@ -475,6 +479,7 @@
                 <table class="module-info" id="moduleTable">
                     <tr>
                         <th>Module</th>
+                        <th>ShortName</th>
                         <th>Code</th>
                         <th>Lecturer</th>
                         <th>Lecturing Hours</th>
@@ -506,7 +511,7 @@
         
         <div class="footer">
             <div class="students-list">
-                Timetable for: <span class="dynamic-placeholder" id="studentsList">Lee Wei, Amira Yusof, Tan Kai, James Wilson</span>
+                Timetable for: <span class="dynamic-placeholder" id="studentsList">Non Student</span>
             </div>
             <div>
                 © 2025 First City University College - Faculty of Computer Science and Technology
@@ -515,198 +520,20 @@
     </div>
 
     <script>
-        // Mock database - This would be replaced with actual API calls in a real application
-        const mockDatabase = {
-            timetables: {
-                T0001: {
-                    id: 'T0001',
-                    batch_id: 'B0001',
-                    start_date: '2025-07-01',
-                    duration_weeks: 14,
-                    CreateTime: '2025-07-14 23:55:24',
-                    lastModifyTime: '2025-07-14 23:55:24',
-                    Active: 1
-                },
-                T0002: {
-                    id: 'T0002',
-                    batch_id: 'B0002',
-                    start_date: '2025-07-01',
-                    duration_weeks: 14,
-                    CreateTime: '2025-07-14 23:55:24',
-                    lastModifyTime: '2025-07-14 23:55:24',
-                    Active: 1
-                },
-                T0003: {
-                    id: 'T0003',
-                    batch_id: 'B0003',
-                    start_date: '2025-07-01',
-                    duration_weeks: 14,
-                    CreateTime: '2025-08-02 00:01:35',
-                    lastModifyTime: '2025-08-02 00:01:35',
-                    Active: 1
-                },
-                T0004: {
-                    id: 'T0004',
-                    batch_id: 'B0004',
-                    start_date: '2025-07-01',
-                    duration_weeks: 14,
-                    CreateTime: '2025-08-02 00:01:35',
-                    lastModifyTime: '2025-08-02 00:01:35',
-                    Active: 1
-                },
-                T0005: {
-                    id: 'T0005',
-                    batch_id: 'B0005',
-                    start_date: '2025-07-01',
-                    duration_weeks: 14,
-                    CreateTime: '2025-08-02 00:01:35',
-                    lastModifyTime: '2025-08-02 00:01:35',
-                    Active: 1
-                }
-            },
-            
-            batches: {
-                B0001: {
-                    ID: 'B0001',
-                    intake_name: '25Jun',
-                    course_name: 'BSc in IT',
-                    Faculty: 'Faculty of Computer Science and Technology',
-                    year: 2025,
-                    year_of_study: 1,
-                    semester: 1,
-                    program_coordinator_id: 'L0001'
-                },
-                B0002: {
-                    ID: 'B0002',
-                    intake_name: '25Jun',
-                    course_name: 'Diploma in Business',
-                    Faculty: 'Faculty of Business Administration',
-                    year: 2025,
-                    year_of_study: 1,
-                    semester: 1,
-                    program_coordinator_id: 'L0003'
-                },
-                B0003: {
-                    ID: 'B0003',
-                    intake_name: '25Feb',
-                    course_name: 'BSc in Computer Science',
-                    Faculty: 'Faculty of Computer Science and Technology',
-                    year: 2025,
-                    year_of_study: 2,
-                    semester: 1,
-                    program_coordinator_id: 'L0004'
-                },
-                B0004: {
-                    ID: 'B0004',
-                    intake_name: '25Jun',
-                    course_name: 'BSc in Data Science',
-                    Faculty: 'Faculty of Computer Science and Technology',
-                    year: 2025,
-                    year_of_study: 1,
-                    semester: 1,
-                    program_coordinator_id: 'L0006'
-                },
-                B0005: {
-                    ID: 'B0005',
-                    intake_name: '25Feb',
-                    course_name: 'MBA',
-                    Faculty: 'Faculty of Business Administration',
-                    year: 2025,
-                    year_of_study: 1,
-                    semester: 1,
-                    program_coordinator_id: 'L0008'
-                }
-            },
-            
-            timetableSlots: {
-                T0001: [
-                    { day: 'MO', timeSlot: 1, duration: 2, lecturer_id: 'L0002', venue_id: 'V0001', subject_id: 'SB0001', batch_id: 'B0001' },
-                    { day: 'WE', timeSlot: 1, duration: 3, lecturer_id: 'L0002', venue_id: 'V0002', subject_id: 'SB0003', batch_id: 'B0001' },
-                    { day: 'TU', timeSlot: 3, duration: 2, lecturer_id: 'L0004', venue_id: 'V0003', subject_id: 'SB0004', batch_id: 'B0001' },
-                    { day: 'TH', timeSlot: 1, duration: 2, lecturer_id: 'L0004', venue_id: 'V0004', subject_id: 'SB0005', batch_id: 'B0001' },
-                    { day: 'FR', timeSlot: 5, duration: 2, lecturer_id: 'L0004', venue_id: 'V0005', subject_id: 'SB0005', batch_id: 'B0001' },
-                    { day: 'WE', timeSlot: 7, duration: 2, lecturer_id: 'L0002', venue_id: 'V0002', subject_id: 'SB0003', batch_id: 'B0001' }
-                ],
-                T0002: [
-                    { day: 'TU', timeSlot: 2, duration: 2, lecturer_id: 'L0003', venue_id: 'V0001', subject_id: 'SB0002', batch_id: 'B0002' },
-                    { day: 'WE', timeSlot: 4, duration: 3, lecturer_id: 'L0005', venue_id: 'V0001', subject_id: 'SB0006', batch_id: 'B0002' },
-                    { day: 'FR', timeSlot: 3, duration: 3, lecturer_id: 'L0003', venue_id: 'V0003', subject_id: 'SB0002', batch_id: 'B0002' }
-                ],
-                T0003: [
-                    { day: 'MO', timeSlot: 1, duration: 2, lecturer_id: 'L0007', venue_id: 'V0002', subject_id: 'SB0001', batch_id: 'B0003' },
-                    { day: 'WE', timeSlot: 3, duration: 2, lecturer_id: 'L0007', venue_id: 'V0003', subject_id: 'SB0003', batch_id: 'B0003' },
-                    { day: 'FR', timeSlot: 2, duration: 2, lecturer_id: 'L0006', venue_id: 'V0004', subject_id: 'SB0007', batch_id: 'B0003' },
-                    { day: 'TU', timeSlot: 6, duration: 2, lecturer_id: 'L0002', venue_id: 'V0004', subject_id: 'SB0003', batch_id: 'B0003' }
-                ],
-                T0004: [
-                    { day: 'TU', timeSlot: 1, duration: 2, lecturer_id: 'L0004', venue_id: 'V0005', subject_id: 'SB0004', batch_id: 'B0004' },
-                    { day: 'TH', timeSlot: 3, duration: 3, lecturer_id: 'L0004', venue_id: 'V0001', subject_id: 'SB0005', batch_id: 'B0004' },
-                    { day: 'FR', timeSlot: 1, duration: 2, lecturer_id: 'L0006', venue_id: 'V0005', subject_id: 'SB0007', batch_id: 'B0004' },
-                    { day: 'MO', timeSlot: 9, duration: 3, lecturer_id: 'L0004', venue_id: 'V0004', subject_id: 'SB0005', batch_id: 'B0004' }
-                ],
-                T0005: [
-                    { day: 'MO', timeSlot: 4, duration: 2, lecturer_id: 'L0008', venue_id: 'V0002', subject_id: 'SB0006', batch_id: 'B0005' },
-                    { day: 'WE', timeSlot: 2, duration: 3, lecturer_id: 'L0008', venue_id: 'V0003', subject_id: 'SB0008', batch_id: 'B0005' },
-                    { day: 'TH', timeSlot: 5, duration: 2, lecturer_id: 'L0005', venue_id: 'V0001', subject_id: 'SB0006', batch_id: 'B0005' }
-                ]
-            },
-            
-            subjects: {
-                SB0001: { ID: 'SB0001', fullname: 'Data Structure and Architecture', shortname: 'DSA', code: 'CDIT434' },
-                SB0002: { ID: 'SB0002', fullname: 'Introduction to Marketing', shortname: 'MKT101', code: 'CBUS112' },
-                SB0003: { ID: 'SB0003', fullname: 'Operating System Fundamentals', shortname: 'OSF', code: 'CDIT320' },
-                SB0004: { ID: 'SB0004', fullname: 'Database Management Systems', shortname: 'DBMS', code: 'CDIT450' },
-                SB0005: { ID: 'SB0005', fullname: 'Web Application Development', shortname: 'WEBDEV', code: 'CDIT420' },
-                SB0006: { ID: 'SB0006', fullname: 'Business Statistics', shortname: 'BUSSTAT', code: 'CBUS210' },
-                SB0007: { ID: 'SB0007', fullname: 'Software Engineering', shortname: 'SWENG', code: 'CDIT480' },
-                SB0008: { ID: 'SB0008', fullname: 'Financial Accounting', shortname: 'FINACC', code: 'CBUS310' }
-            },
-            
-            lecturers: {
-                L0001: { ID: 'L0001', name: 'Dr. Alice Tan', position: 'program coordinator', Faculty: 'Faculty of Computer Science and Technology' },
-                L0002: { ID: 'L0002', name: 'Mr. John Lim', position: 'full time Lecturer', Faculty: 'Faculty of Computer Science and Technology' },
-                L0003: { ID: 'L0003', name: 'Ms. Clara Goh', position: 'part time Lecturer', Faculty: 'Faculty of Business Administration' },
-                L0004: { ID: 'L0004', name: 'Dr. Sarah Chen', position: 'full time Lecturer', Faculty: 'Faculty of Computer Science and Technology' },
-                L0005: { ID: 'L0005', name: 'Mr. Raj Patel', position: 'part time Lecturer', Faculty: 'Faculty of Business Administration' },
-                L0006: { ID: 'L0006', name: 'Ms. Elena Rodriguez', position: 'full time Lecturer', Faculty: 'Faculty of Computer Science and Technology' },
-                L0007: { ID: 'L0007', name: 'Dr. Kenji Tanaka', position: 'full time Lecturer', Faculty: 'Faculty of Engineering' },
-                L0008: { ID: 'L0008', name: 'Ms. Fatima Ali', position: 'part time Lecturer', Faculty: 'Faculty of Business Administration' }
-            },
-            
-            venues: {
-                V0001: { ID: 'V0001', Name: 'Room A101' },
-                V0002: { ID: 'V0002', Name: 'Lab B204' },
-                V0003: { ID: 'V0003', Name: 'Auditorium C301' },
-                V0004: { ID: 'V0004', Name: 'Seminar Room D102' },
-                V0005: { ID: 'V0005', Name: 'Computer Lab E205' }
-            },
-            
-            students: {
-                B0001: [
-                    { ID: 'S0001', name: 'Lee Wei', intakeTime: '2025-06-25' },
-                    { ID: 'S0002', name: 'Amira Yusof', intakeTime: '2025-06-25' },
-                    { ID: 'S0004', name: 'James Wilson', intakeTime: '2025-06-25' },
-                    { ID: 'S0005', name: 'Sophia Garcia', intakeTime: '2025-06-25' }
-                ],
-                B0002: [
-                    { ID: 'S0003', name: 'Tan Kai', intakeTime: '2025-06-25' },
-                    { ID: 'S0006', name: 'Mohamed Ali', intakeTime: '2025-06-25' },
-                    { ID: 'S0007', name: 'Emma Johnson', intakeTime: '2025-06-25' }
-                ],
-                B0003: [
-                    { ID: 'S0008', name: 'Zhang Wei', intakeTime: '2025-02-01' },
-                    { ID: 'S0009', name: 'Olivia Brown', intakeTime: '2025-02-01' }
-                ],
-                B0004: [
-                    { ID: 'S0010', name: 'Noah Davis', intakeTime: '2025-06-25' },
-                    { ID: 'S0011', name: 'Ava Miller', intakeTime: '2025-06-25' }
-                ],
-                B0005: [
-                    { ID: 'S0012', name: 'Liam Wilson', intakeTime: '2025-02-01' },
-                    { ID: 'S0013', name: 'Isabella Moore', intakeTime: '2025-02-01' }
-                ]
+
+        // get timetable data
+        async function getTimetableData(timetableId) {
+            const res = await fetch(`../get_data/get_timetable.php?id=${timetableId}`);
+            const data = await res.json();
+
+            if (data.error) {
+                alert(data.error);
+                return;
             }
-        };
+
+            return data;
+        }
+        
 
         // Get timetable ID from URL
         function getTimetableIdFromUrl() {
@@ -754,7 +581,7 @@
             // Each time slot represents 30 minutes
             // Our time slots start at 8:00 AM (slot 0)
             // Each row represents a 30-minute interval
-            return timeSlot;
+            return timeSlot - 1;
         }
 
         // Generate term dates
@@ -804,11 +631,17 @@
         }
 
         // Render timetable
-        function renderTimetable(timetableId) {
-            const timetableData = mockDatabase.timetables[timetableId];
-            const batchData = mockDatabase.batches[timetableData.batch_id];
-            const slots = mockDatabase.timetableSlots[timetableId];
-            const students = mockDatabase.students[batchData.ID];
+        async function renderTimetable(timetableId) {
+
+            timetableOriginalData = await getTimetableData(timetableId);
+
+            const timetableData = timetableOriginalData.timetable;
+            const batchData = timetableOriginalData.batch;
+            const slots = timetableOriginalData.slots;
+            const students = timetableOriginalData.students;
+            const subjects = timetableOriginalData.subjects;
+            const lecturers = timetableOriginalData.lecturers;
+            const venues = timetableOriginalData.venues;
             
             // Update header information
             document.getElementById('universityName').textContent = 'FIRST CITY UNIVERSITY COLLEGE';
@@ -868,40 +701,41 @@
                 
                 // Add empty cells for each day
                 for (let j = 0; j < 5; j++) {
-                    row.insertCell(j + 1);
+                    const cell = row.insertCell(j + 1);
+                    cell.id = `cell-${i}-${j}`;
                 }
             }
             
             // Place class slots in timetable
             slots.forEach(slot => {
-                const subject = mockDatabase.subjects[slot.subject_id];
-                const lecturer = mockDatabase.lecturers[slot.lecturer_id];
-                const venue = mockDatabase.venues[slot.venue_id];
+                const subject = timetableOriginalData.subjects[slot.subject_id];
+                const lecturer = timetableOriginalData.lecturers[slot.lecturer_id];
+                const venue = timetableOriginalData.venues[slot.venue_id];
                 
-                const position = findSlotPosition(slot.timeSlot);
-                const row = timetableBody.rows[position];
-                const dayIndex = ['MO', 'TU', 'WE', 'TH', 'FR'].indexOf(slot.day) + 1;
-                
-                // Skip if time slot is beyond our schedule
-                if (position >= timetableBody.rows.length) return;
-                
-                const cell = row.cells[dayIndex];
+                const rowIndex = findSlotPosition(slot.timeSlot); // slot.timeSlot 是 0 起点
+                const dayIndex = ['MO', 'TU', 'WE', 'TH', 'FR'].indexOf(slot.day);
+
+                const cellId = `cell-${rowIndex}-${dayIndex}`;
+                const cell = document.getElementById(cellId);
+                if (!cell) return;
+
                 cell.rowSpan = slot.duration;
                 cell.className = 'class-slot';
                 cell.innerHTML = `
-                    <span class="course-code">${subject.shortname}</span>
-                    <span class="class-type">Lecture</span><br>
+                    <span class="course-code">${subject.shortname}</span><br>
                     <span class="class-room">${venue.Name}</span><br>
                     <span class="date-range">${lecturer.name}</span>
                 `;
-                
-                // Clear cells that are covered by rowspan
+
+                // 删除被占用的格子（完全移除）
                 for (let i = 1; i < slot.duration; i++) {
-                    const nextRow = timetableBody.rows[position + i];
-                    if (nextRow) {
-                        nextRow.cells[dayIndex].style.display = 'none';
+                    const nextCellId = `cell-${rowIndex + i}-${dayIndex}`;
+                    const nextCell = document.getElementById(nextCellId);
+                    if (nextCell) {
+                        nextCell.remove(); // ❗彻底移除
                     }
                 }
+
             });
             
             // Populate module information
@@ -915,31 +749,33 @@
             slots.forEach(slot => {
                 const subjectId = slot.subject_id;
                 if (!uniqueSubjects[subjectId]) {
-                    uniqueSubjects[subjectId] = mockDatabase.subjects[subjectId];
+                    uniqueSubjects[subjectId] = timetableOriginalData.subjects[subjectId];
                 }
             });
             
             // Add module rows
             Object.values(uniqueSubjects).forEach(subject => {
                 const row = moduleTable.insertRow();
-                const cell1 = row.insertCell(0);
-                const cell2 = row.insertCell(1);
-                const cell3 = row.insertCell(2);
-                const cell4 = row.insertCell(3);
-                const cell5 = row.insertCell(4);
+                const cell1 = row.insertCell(0); // Full Name
+                const cell2 = row.insertCell(1); // Short Name
+                const cell3 = row.insertCell(2); // Code
+                const cell4 = row.insertCell(3); // Lecturer
+                const cell5 = row.insertCell(4); // Credit Hours
+                const cell6 = row.insertCell(5); // Contact Hours
                 
                 cell1.textContent = subject.fullname;
-                cell2.textContent = subject.code;
+                cell2.textContent = subject.shortname;
+                cell3.textContent = subject.code;
                 
                 // Find lecturer for this subject
                 const slot = slots.find(s => s.subject_id === subject.ID);
                 if (slot) {
-                    cell3.textContent = mockDatabase.lecturers[slot.lecturer_id].name;
+                    cell4.textContent = timetableOriginalData.lecturers[slot.lecturer_id].name;
                 }
                 
                 // Set default hours
-                cell4.textContent = '2';
                 cell5.textContent = '2';
+                cell6.textContent = '2';
             });
         }
 
