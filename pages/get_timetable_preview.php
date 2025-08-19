@@ -56,7 +56,7 @@ foreach ($days as $day) {
 }
 
 // 每 slot 一行
-for ($slot = 0; $slot < 16; $slot++) {
+for ($slot = 1; $slot <= 16; $slot++) {
     $startTime = date("G:i", strtotime("09:00") + $slot * 30 * 60);
     $endTime = date("G:i", strtotime("09:00") + ($slot + 1) * 30 * 60);
     echo "<tr><td>{$startTime} ~ {$endTime}</td>";

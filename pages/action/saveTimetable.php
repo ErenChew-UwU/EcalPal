@@ -43,10 +43,20 @@ try {
     }
 
     // 清空旧的 timetableslot 记录
-    $deleteSql = "DELETE FROM timetableslot WHERE timetable_id = '$timetableId'";
-    if (!$conn->query($deleteSql)) {
-        throw new Exception("Failed to clear old timetable slots: " . $conn->error);
+    if ($source === 'generated') {
+        foreach ($batchTimetableMap as $timetableId) {
+            $deleteSql = "DELETE FROM timetableslot WHERE timetable_id = '$timetableId'";
+            if (!$conn->query($deleteSql)) {
+                throw new Exception("Failed to clear old timetable slots: " . $conn->error);
+            }
+        }
+    } else {
+        $deleteSql = "DELETE FROM timetableslot WHERE timetable_id = '$timetableId'";
+        if (!$conn->query($deleteSql)) {
+            throw new Exception("Failed to clear old timetable slots: " . $conn->error);
+        }
     }
+
 
     // 插入新记录
     foreach ($changes as $change) {
@@ -58,15 +68,36 @@ try {
         $subjectId = $conn->real_escape_string($change['subjectId']);
         $batchId = $conn->real_escape_string($change['batchId']);
 
+        // 获取正确的 timetableId
+        $timetableIdForInsert = ($source === 'generated') ? $batchTimetableMap[$batchId] : $timetableId;
+
         $insertSql = "INSERT INTO timetableslot 
             (timetable_id, day, timeSlot, duration, lecturer_id, venue_id, subject_id, batch_id)
             VALUES 
-            ('$timetableId', '$day', $timeSlot, $duration, '$lecturerId', '$venueId', '$subjectId', '$batchId')";
+            ('$timetableIdForInsert', '$day', $timeSlot, $duration, '$lecturerId', '$venueId', '$subjectId', '$batchId')";
 
         if (!$conn->query($insertSql)) {
             throw new Exception("Failed to insert slot: " . $conn->error);
         }
     }
+
+    $now = date('Y-m-d H:i:s');
+
+    if ($source === 'generated') {
+        foreach ($batchTimetableMap as $timetableIdToUpdate) {
+            $updateTimeSql = "UPDATE timetable SET lastModifyTime = '$now' WHERE ID = '$timetableIdToUpdate'";
+            if (!$conn->query($updateTimeSql)) {
+                throw new Exception("Failed to update lastModifyTime: " . $conn->error);
+            }
+        }
+    } else {
+        $updateTimeSql = "UPDATE timetable SET lastModifyTime = '$now' WHERE ID = '$timetableId'";
+        if (!$conn->query($updateTimeSql)) {
+            throw new Exception("Failed to update lastModifyTime: " . $conn->error);
+        }
+    }
+
+
 
     $conn->commit();
     $response['success'] = true;
@@ -90,15 +121,23 @@ function getOrCreateTimetable($conn, $batchId) {
         return $result->fetch_assoc()['ID'];
     }
 
+    $timetableResult = $conn->query("SELECT ID FROM timetable ORDER BY ID DESC LIMIT 1");
+    $lastTimetableId = $timetableResult->fetch_assoc()['ID'] ?? 'T0000';
+
+    $numericPart = (int)substr($lastTimetableId, 1);
+    $newNumericPart = str_pad($numericPart + 1, 4, '0', STR_PAD_LEFT);
+    $newTimetableId = 'T' . $newNumericPart;
+
+
     $now = date('Y-m-d H:i:s');
     $startDate = date('Y-m-d');
     $insertSql = "INSERT INTO timetable 
-        (batch_id, start_date, duration_weeks, CreateTime, lastModifyTime, Active)
+        (ID, batch_id, start_date, duration_weeks, CreateTime, lastModifyTime, Active)
         VALUES 
-        ('$batchId', '$startDate', 14, '$now', '$now', 1)";
+        ('$newTimetableId', '$batchId', '$startDate', 14, '$now', '$now', 1)";
     
     if ($conn->query($insertSql)) {
-        return $conn->insert_id;
+        return $newTimetableId;
     }
 
     throw new Exception("Failed to create new timetable: " . $conn->error);
