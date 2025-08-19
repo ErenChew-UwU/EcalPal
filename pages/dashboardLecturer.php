@@ -7,13 +7,27 @@ include_once("../dbconnect.php");
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecturer Dashboard - Timetable System</title>
+    <title>Ecalpal | Lecturer Dashboard</title>
     <link rel="shortcut icon" href="../src/ico/ico_logo_001.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../stylesheets/style_header.css">
     <link rel="stylesheet" href="../stylesheets/style_all.css">
     <style>
-        
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #eef2ff;
+            --secondary-color: #3f37c9;
+            --accent-color: #7d51ff;
+            --success-color: #38b000;
+            --warning-color: #ff9e00;
+            --danger-color: #e5383b;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --light-bg: #f8fafc;
+            --border-color: #e2e8f0;
+            --card-shadow: 0 10px 20px rgba(0,0,0,0.05), 0 6px 6px rgba(0,0,0,0.04);
+            --hover-shadow: 0 15px 30px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.07);
+        }
         /* Main Content Styles */
         .container {
             max-width: 1400px;
@@ -149,35 +163,120 @@ include_once("../dbconnect.php");
         .actions {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
-        
+
         .action-btn {
-            padding: 8px 12px;
-            border-radius: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
             border: none;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1;
         }
-        
+
+        .action-btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-100%);
+            transition: transform 0.4s ease;
+            z-index: -1;
+        }
+
+        .action-btn:hover:before {
+            transform: translateX(0);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+
+        .action-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .action-btn i {
+            transition: all 0.3s ease;
+        }
+
+        .view-btn {
+            background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
+            color: white;
+            border: 1px solid rgba(67, 97, 238, 0.3);
+        }
+
+        .view-btn:hover {
+            background: linear-gradient(135deg, #3b5fdb 0%, #3730a8 100%);
+        }
+
+        .view-btn:hover i {
+            transform: scale(1.15) rotate(5deg);
+        }
+
+        .subject-btn {
+            background: linear-gradient(135deg, #43ee73 0%, #37c957 100%);
+            color: white;
+            border: 1px solid rgba(67, 238, 121, 0.3);
+        }
+
+        .subject-btn:hover {
+            background: linear-gradient(135deg, #3bdb66 0%, #30a844 100%);
+        }
+
+        .subject-btn:hover i {
+            transform: scale(1.15) rotate(5deg);
+        }
+
         .edit-btn {
-            background: rgba(236, 201, 75, 0.15);
-            color: var(--warning-color);
+            background: linear-gradient(135deg, #ffb300 0%, #ff9e00 100%);
+            color: #fff;
+            border: 1px solid rgba(236, 201, 75, 0.3);
         }
-        
+
         .edit-btn:hover {
-            background: rgba(236, 201, 75, 0.25);
+            background: linear-gradient(135deg, #e6a100 0%, #e58f00 100%);
         }
-        
+
+        .edit-btn:hover i {
+            transform: rotate(15deg) scale(1.15);
+        }
+
         .delete-btn {
-            background: rgba(229, 62, 62, 0.15);
-            color: var(--danger-color);
+            background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+            color: white;
+            border: 1px solid rgba(229, 62, 62, 0.3);
         }
-        
+
         .delete-btn:hover {
-            background: rgba(229, 62, 62, 0.25);
+            background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+        }
+
+        .delete-btn:hover i {
+            transform: scale(1.15);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) rotate(0); }
+            20% { transform: translateX(-3px) rotate(-5deg); }
+            40% { transform: translateX(3px) rotate(5deg); }
+            60% { transform: translateX(-3px) rotate(-5deg); }
+            80% { transform: translateX(3px) rotate(5deg); }
         }
         
         /* Stats Section */
@@ -331,6 +430,43 @@ include_once("../dbconnect.php");
 
         .close:hover {
             color: #333;
+        }
+
+        .subject-card , .no-subjects {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transition: all 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .subject-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        
+        .subject-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #3498db, #9b59b6);
+        }
+
+        .subject-display , .no-subjects {
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            line-height: 1.3;
         }
 
         
@@ -493,10 +629,14 @@ include_once("../dbconnect.php");
                                 echo "<button class='action-btn view-btn' onclick=\"showAvailability('lecturer','{$row['ID']}','{$row['name']}')\">";
                                 echo "<i class='fas fa-calendar-alt'></i> View";
                                 echo "</button>";
-                                
-                                echo "<button class='action-btn edit-btn'>";
-                                echo "<i class='fas fa-edit'></i> Edit";
+
+                                echo "<button class='action-btn subject-btn' onclick=\"showSubjects('{$row['ID']}', '{$row['name']}')\">";
+                                echo "<i class='fas fa-book'></i> Subjects";
                                 echo "</button>";
+                                
+                                echo "<a class='action-btn edit-btn' href='./action/editLecturer.php?lecturer={$row['ID']}'>";
+                                echo "<i class='fas fa-edit'></i> Edit";
+                                echo "</a>";
                                 echo "<button class='action-btn delete-btn' onclick='confirmDelete(\"{$row['ID']}\", \"{$row['name']}\")'>";
                                 echo "<i class='fas fa-trash'></i> Delete";
                                 echo "</button>";
@@ -525,9 +665,9 @@ include_once("../dbconnect.php");
     <script>     
         // 确认删除函数
         function confirmDelete(id, name) {
-            if (confirm(`Are you sure you want to delete lecturer "${name}" (ID: ${id})? This action cannot be undone.`)) {
+            if (confirm(`Some features are still under development and will be available in future updates.`)) {
                 // 在实际应用中，这里应该发送AJAX请求或重定向到删除脚本
-                alert(`Lecturer ${name} (${id}) would be deleted in a real application.`);
+                // alert(`Lecturer ${name} (${id}) would be deleted in a real application.`);
                 // window.location.href = `delete_lecturer.php?id=${id}`;
             }
         }
@@ -647,6 +787,89 @@ include_once("../dbconnect.php");
         function closeModal() {
             document.getElementById('availability-modal').style.display = 'none';
         }
+
+        window.addEventListener('click', function(event) {
+            const subjectsModal = document.getElementById('availability-modal');
+            if (event.target === subjectsModal) {
+                closeModal();
+            }
+        });
+
+        // 获取科目数据的函数
+        function fetchSubjects(lecturerId) {
+            return fetch(`get_lecturer_subjects.php?lecturer_id=${lecturerId}`)
+                .then(response => response.json())
+                .catch(error => {
+                    console.error('Error fetching subjects:', error);
+                    return { error: 'Failed to fetch subjects data' };
+                });
+        }
+
+        // 显示科目模态框
+        async function showSubjects(lecturerId, lecturerName) {
+            const modal = document.getElementById('subjects-modal');
+            const title = document.getElementById('subjects-title');
+            const content = document.getElementById('subjects-content');
+            
+            // 设置标题
+            title.textContent = `${lecturerName}'s Subjects`;
+            
+            // 显示加载状态
+            content.innerHTML = '<div class="loading">Loading subjects data...</div>';
+            modal.style.display = 'flex';
+            
+            try {
+                // 获取科目数据
+                const response = await fetchSubjects(lecturerId);
+                
+                if (response.error) {
+                    content.innerHTML = `<div class="error">${response.error}</div>`;
+                    return;
+                }
+                
+                // 填充科目列表
+                populateSubjectsList(response.subjects);
+            } catch (error) {
+                console.error('Error:', error);
+                content.innerHTML = '<div class="error">Error loading subjects data</div>';
+            }
+        }
+        
+        // 填充科目列表
+        function populateSubjectsList(subjects) {
+            const content = document.getElementById('subjects-content');
+            
+            if (subjects.length === 0) {
+                content.innerHTML = '<div class="no-subjects">This lecturer has no assigned subjects.</div>';
+                return;
+            }
+            
+            let html = '<div class="subject-list">';
+            
+            subjects.forEach(subject => {
+                html += `
+                <div class="subject-card">
+                    <div class="subject-display">${subject.display}</div>
+                </div>
+                `;
+            });
+            
+            html += '</div>';
+            content.innerHTML = html;
+        }
+        
+        // 关闭科目模态框
+        function closeSubjectsModal() {
+            document.getElementById('subjects-modal').style.display = 'none';
+        }
+        
+        // 关闭所有模态框（点击模态框外部）
+        window.addEventListener('click', function(event) {
+            const subjectsModal = document.getElementById('subjects-modal');
+            if (event.target === subjectsModal) {
+                closeSubjectsModal();
+            }
+        });
     </script>
 
     <!-- 可用时间模态框 -->
@@ -657,6 +880,20 @@ include_once("../dbconnect.php");
                 <span class="close" onclick="closeModal()">&times;</span>
             </div>
             <div id="time-grid" class="time-grid"></div>
+        </div>
+    </div>
+    <div id="subjects-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-book"></i>
+                    <span id="subjects-title">Lecturer Subjects</span>
+                </div>
+                <span class="close" onclick="closeSubjectsModal()">&times;</span>
+            </div>
+            <div id="subjects-content">
+                <div class="loading">Loading subjects...</div>
+            </div>
         </div>
     </div>
 </body>

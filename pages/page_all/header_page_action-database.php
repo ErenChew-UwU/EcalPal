@@ -10,11 +10,11 @@
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
-            <a href="../../pages/dashboardTimetable.php" class="nav-link active">
+            <a href="../../pages/dashboardTimetable.php" class="nav-link">
                 <i class="fas fa-calendar-alt"></i>
                 <span>Timetable</span>
             </a>
-            <div class="nav-link dropdown">
+            <div class="nav-link dropdown active">
                 <i class="fas fa-database"></i>
                 <span>Database</span>
                 <div class="dropdown-content">

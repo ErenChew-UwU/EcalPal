@@ -1,21 +1,46 @@
 <?php
 include_once("./dbconnect.php");
+
+// 获取最后修改的时间表及对应的 batch 名称
+$sql = "
+    SELECT timetable.ID AS timetable_id, timetable.batch_id, timetable.lastModifyTime, batch.course_name 
+    FROM timetable 
+    JOIN batch ON timetable.batch_id = batch.ID 
+    ORDER BY timetable.lastModifyTime DESC 
+    LIMIT 1
+";
+
+$result = $conn->query($sql);
+$timetable = $result->fetch_assoc();
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>University Timetable System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ecalpal</title>
+    <title>Ecalpal | Index</title>
     <link rel="shortcut icon" href="./src/ico/ico_logo_001.png">
     <link rel="stylesheet" href="./stylesheets/style_header.css">
     <link rel="stylesheet" href="./stylesheets/style_all.css">
     <style>
-        
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #eef2ff;
+            --secondary-color: #3f37c9;
+            --accent-color: #7d51ff;
+            --success-color: #38b000;
+            --warning-color: #ff9e00;
+            --danger-color: #e5383b;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --light-bg: #f8fafc;
+            --border-color: #e2e8f0;
+            --card-shadow: 0 10px 20px rgba(0,0,0,0.05), 0 6px 6px rgba(0,0,0,0.04);
+            --hover-shadow: 0 15px 30px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.07);
+        }
         /* Main Content Styles */
         .container {
             max-width: 1400px;
@@ -170,7 +195,7 @@ include_once("./dbconnect.php");
             color: var(--text-dark);
         }
         
-        .db-item:hover {
+        .db-item:hover:not(.future) {
             background: #edf2f7;
             transform: translateY(-3px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -236,9 +261,19 @@ include_once("./dbconnect.php");
             flex-direction: column;
             align-items: center;
             text-align: center;
+            cursor: pointer;
         }
+
+        .future {
+            background: #e0e0e0; /* 灰色背景 */
+            color: #999; /* 灰色文字 */
+            cursor: not-allowed;
+            opacity: 0.6; /* 整体变暗 */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
         
-        .function-card:hover {
+        .function-card:hover:not(.future) {
             transform: translateY(-5px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
         }
@@ -347,19 +382,19 @@ include_once("./dbconnect.php");
                         <h3>Last Modified Timetable</h3>
                         <div class="timetable-meta">
                             <div class="meta-item">
-                                <div class="meta-label">Timetable Name</div>
-                                <!-- <div class="meta-value">Fall Semester 2023</div> -->
+                                <div class="meta-label">Batch Name of Timetable</div>
+                                <div class="meta-value"><?php echo htmlspecialchars($timetable['course_name']); ?></div>
                             </div>
                             <div class="meta-item">
                                 <div class="meta-label">Last Modified</div>
-                                <!-- <div class="meta-value">Oct 15, 2023 14:30</div> -->
+                                <div class="meta-value"><?php echo date("M d, Y H:i", strtotime($timetable['lastModifyTime'])); ?></div>
                             </div>
                         </div>
                         <div class="timetable-actions">
-                            <a href="./pages/viewTimetable.php?timetable=T001" class="btn btn-view">
+                            <a href="./pages/action/viewTimetable.php?timetable=<?php echo $timetable['timetable_id']; ?>" class="btn btn-view">
                                 <i class="fas fa-eye"></i> View
                             </a>
-                            <a href="./pages/editTimetable.php?timetable=T001" class="btn btn-edit">
+                            <a href="./pages/action/editTimetable.php?timetable=<?php echo $timetable['timetable_id']; ?>" class="btn btn-edit">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
                         </div>
@@ -374,7 +409,7 @@ include_once("./dbconnect.php");
                 </div>
                 <div class="card-body">
                     <div class="database-grid">
-                        <a href="./pages/dashboardBatch.php" class="db-item">
+                        <a href="./pages/dashboardBatch.php" class="db-item future">
                             <div class="db-icon batch">
                                 <i class="fas fa-users"></i>
                             </div>
@@ -386,19 +421,19 @@ include_once("./dbconnect.php");
                             </div>
                             <div class="db-title">Lecturer</div>
                         </a>
-                        <a href="./pages/dashboardStudent.php" class="db-item">
+                        <a href="./pages/dashboardStudent.php" class="db-item future">
                             <div class="db-icon student">
                                 <i class="fas fa-user-graduate"></i>
                             </div>
                             <div class="db-title">Student</div>
                         </a>
-                        <a href="./pages/dashboardSubject.php" class="db-item">
+                        <a href="./pages/dashboardSubject.php" class="db-item future">
                             <div class="db-icon subject">
                                 <i class="fas fa-book"></i>
                             </div>
                             <div class="db-title">Subject</div>
                         </a>
-                        <a href="./pages/dashboardVenue.php" class="db-item">
+                        <a href="./pages/dashboardVenue.php" class="db-item future">
                             <div class="db-icon venue">
                                 <i class="fas fa-building"></i>
                             </div>
@@ -425,7 +460,7 @@ include_once("./dbconnect.php");
                 <p class="function-desc">Automatically create optimized schedules based on current data</p>
             </div>
             
-            <div class="function-card">
+            <div class="function-card future">
                 <div class="function-icon export">
                     <i class="fas fa-file-export"></i>
                 </div>
@@ -433,7 +468,7 @@ include_once("./dbconnect.php");
                 <p class="function-desc">Export timetable data to Excel, PDF or other formats</p>
             </div>
             
-            <div class="function-card">
+            <div class="function-card future">
                 <div class="function-icon import">
                     <i class="fas fa-file-import"></i>
                 </div>
@@ -441,7 +476,7 @@ include_once("./dbconnect.php");
                 <p class="function-desc">Import course data from external sources</p>
             </div>
             
-            <div class="function-card">
+            <div class="function-card future">
                 <div class="function-icon manage">
                     <i class="fas fa-user-cog"></i>
                 </div>
@@ -449,7 +484,7 @@ include_once("./dbconnect.php");
                 <p class="function-desc">Add, edit or remove system users and permissions</p>
             </div>
             
-            <div class="function-card">
+            <div class="function-card future">
                 <div class="function-icon report">
                     <i class="fas fa-chart-bar"></i>
                 </div>
@@ -457,7 +492,7 @@ include_once("./dbconnect.php");
                 <p class="function-desc">Create detailed reports on resource utilization</p>
             </div>
             
-            <div class="function-card">
+            <div class="function-card future">
                 <div class="function-icon setting">
                     <i class="fas fa-sliders-h"></i>
                 </div>
@@ -473,4 +508,10 @@ include_once("./dbconnect.php");
         <p>Timetable Management System v2.0</p>
     </footer>
 </body>
+<script>
+document.querySelector('.function-card .function-icon.generate').parentElement
+    .addEventListener('click', function() {
+        window.location.href = './pages/action/createTimetable.php';
+    });
+</script>
 </html>
