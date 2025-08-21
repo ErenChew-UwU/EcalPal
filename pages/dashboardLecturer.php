@@ -619,7 +619,7 @@ include_once("../dbconnect.php");
                                 // 修复1：使用正确的imagePath字段
                                 echo "<tr>";
                                 echo "<td>{$row['ID']}</td>";
-                                echo "<td><img src='{$row['image']}' class='profile-img' alt='{$row['name']}'></td>";
+                                echo "<td><img src='../src/{$row['image']}' class='profile-img' alt='{$row['name']}'></td>";
                                 echo "<td>{$row['name']}</td>";
                                 echo "<td>{$row['position']}</td>";
                                 echo "<td>{$row['Faculty']}</td>";
