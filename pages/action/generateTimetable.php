@@ -1,4 +1,6 @@
 <?php
+
+set_time_limit(0);
 $batches = $_POST['batch_ids'] ?? [];
 
 if (!is_array($batches) || empty($batches)) {
