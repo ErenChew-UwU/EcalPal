@@ -777,9 +777,9 @@ include_once("../dbconnect.php");
                                 echo "</a> ";
 
                                 // Delete 按钮（可选加入 confirm）
-                                echo "<button class='action-btn delete-btn' onclick='confirmDelete(\"{$row['timetable_id']}\")'>";
-                                echo "<i class='fas fa-trash'></i> Delete";
-                                echo "</button>";
+                                // echo "<button class='action-btn delete-btn' onclick='confirmDelete(\"{$row['timetable_id']}\")'>";
+                                // echo "<i class='fas fa-trash'></i> Delete";
+                                // echo "</button>";
 
                                 echo "</td>";
                                 echo "</tr>";

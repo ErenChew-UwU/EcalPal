@@ -409,36 +409,36 @@ $timetable = $result->fetch_assoc();
                 </div>
                 <div class="card-body">
                     <div class="database-grid">
-                        <a href="./pages/dashboardBatch.php" class="db-item future">
+                        <!-- <a href="./pages/dashboardBatch.php" class="db-item future">
                             <div class="db-icon batch">
                                 <i class="fas fa-users"></i>
                             </div>
                             <div class="db-title">Batch</div>
-                        </a>
+                        </a> -->
                         <a href="./pages/dashboardLecturer.php" class="db-item">
                             <div class="db-icon lecturer">
                                 <i class="fas fa-chalkboard-teacher"></i>
                             </div>
                             <div class="db-title">Lecturer</div>
                         </a>
-                        <a href="./pages/dashboardStudent.php" class="db-item future">
+                        <!-- <a href="./pages/dashboardStudent.php" class="db-item future">
                             <div class="db-icon student">
                                 <i class="fas fa-user-graduate"></i>
                             </div>
                             <div class="db-title">Student</div>
-                        </a>
-                        <a href="./pages/dashboardSubject.php" class="db-item future">
+                        </a> -->
+                        <!-- <a href="./pages/dashboardSubject.php" class="db-item future">
                             <div class="db-icon subject">
                                 <i class="fas fa-book"></i>
                             </div>
                             <div class="db-title">Subject</div>
-                        </a>
-                        <a href="./pages/dashboardVenue.php" class="db-item future">
+                        </a> -->
+                        <!-- <a href="./pages/dashboardVenue.php" class="db-item future">
                             <div class="db-icon venue">
                                 <i class="fas fa-building"></i>
                             </div>
                             <div class="db-title">Venue</div>
-                        </a>
+                        </a> -->
                     </div>
                 </div>
             </div>
@@ -460,45 +460,45 @@ $timetable = $result->fetch_assoc();
                 <p class="function-desc">Automatically create optimized schedules based on current data</p>
             </div>
             
-            <div class="function-card future">
+            <!-- <div class="function-card future">
                 <div class="function-icon export">
                     <i class="fas fa-file-export"></i>
                 </div>
                 <h3 class="function-title">Export Data</h3>
                 <p class="function-desc">Export timetable data to Excel, PDF or other formats</p>
-            </div>
+            </div> -->
             
-            <div class="function-card future">
+            <!-- <div class="function-card future">
                 <div class="function-icon import">
                     <i class="fas fa-file-import"></i>
                 </div>
                 <h3 class="function-title">Import Data</h3>
                 <p class="function-desc">Import course data from external sources</p>
-            </div>
+            </div> -->
             
-            <div class="function-card future">
+            <!-- <div class="function-card future">
                 <div class="function-icon manage">
                     <i class="fas fa-user-cog"></i>
                 </div>
                 <h3 class="function-title">Manage Users</h3>
                 <p class="function-desc">Add, edit or remove system users and permissions</p>
-            </div>
+            </div> -->
             
-            <div class="function-card future">
+            <!-- <div class="function-card future">
                 <div class="function-icon report">
                     <i class="fas fa-chart-bar"></i>
                 </div>
                 <h3 class="function-title">Generate Reports</h3>
                 <p class="function-desc">Create detailed reports on resource utilization</p>
-            </div>
+            </div> -->
             
-            <div class="function-card future">
+            <!-- <div class="function-card future">
                 <div class="function-icon setting">
                     <i class="fas fa-sliders-h"></i>
                 </div>
                 <h3 class="function-title">System Settings</h3>
                 <p class="function-desc">Configure system preferences and options</p>
-            </div>
+            </div> -->
         </div>
     </div>
     

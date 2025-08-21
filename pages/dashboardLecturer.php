@@ -525,9 +525,9 @@ include_once("../dbconnect.php");
             </h1>
             <div class="search-container">
                 <input type="text" class="search-box" placeholder="Search lecturers...">
-                <a href="./action/createLecturer.php" class="btn btn-primary">
+                <!-- <a href="./action/createLecturer.php" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Add Lecturer
-                </a>
+                </a> -->
             </div>
         </div>
         
@@ -634,12 +634,12 @@ include_once("../dbconnect.php");
                                 echo "<i class='fas fa-book'></i> Subjects";
                                 echo "</button>";
                                 
-                                echo "<a class='action-btn edit-btn' href='./action/editLecturer.php?lecturer={$row['ID']}'>";
-                                echo "<i class='fas fa-edit'></i> Edit";
-                                echo "</a>";
-                                echo "<button class='action-btn delete-btn' onclick='confirmDelete(\"{$row['ID']}\", \"{$row['name']}\")'>";
-                                echo "<i class='fas fa-trash'></i> Delete";
-                                echo "</button>";
+                                // echo "<a class='action-btn edit-btn' href='./action/editLecturer.php?lecturer={$row['ID']}'>";
+                                // echo "<i class='fas fa-edit'></i> Edit";
+                                // echo "</a>";
+                                // echo "<button class='action-btn delete-btn' onclick='confirmDelete(\"{$row['ID']}\", \"{$row['name']}\")'>";
+                                // echo "<i class='fas fa-trash'></i> Delete";
+                                // echo "</button>";
                                 echo "</td>";
                                 echo "</tr>";
                             }
